@@ -1,5 +1,15 @@
 # AZDSDR - Data Scientist's Data Reader
 
+- [AZDSDR - Data Scientist's Data Reader](#azdsdr---data-scientists-data-reader)
+  - [Installation](#installation)
+  - [Use Dremimo Reader](#use-dremimo-reader)
+    - [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
+    - [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
+    - [Step 3. Configure driver](#step-3-configure-driver)
+    - [Sample Query](#sample-query)
+  - [Use Kusto Reader](#use-kusto-reader)
+    - [Sample Query](#sample-query-1)
+
 This package includes data reader for DS to access data in a easy way. 
 
 Covered data platforms 
