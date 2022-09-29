@@ -11,6 +11,7 @@ setup(
     url='https://github.com/gmyrianthous/example-publish-pypi',
     keywords='example project',
     install_requires=[
-          'scikit-learn',
+          'pandas'
+          ,'pyodbc'
       ],
 )
