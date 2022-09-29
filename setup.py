@@ -15,6 +15,6 @@ setup(
         ,'pyodbc'
         ,'azure-cli'
         ,'azure-kusto-data'
-        ,'zure-kusto-ingest'
+        ,'azure-kusto-ingest'
     ],
 )
