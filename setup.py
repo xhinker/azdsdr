@@ -8,7 +8,7 @@ setup(
     author_email='xhinker@hotmail.com',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    url='https://github.com/gmyrianthous/example-publish-pypi',
+    url='https://github.com/xhinker/azdsdr',
     keywords='example project',
     install_requires=[
           'pandas'
