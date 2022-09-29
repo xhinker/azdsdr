@@ -1,7 +1,7 @@
 #%% 
 from src.azdsdr import DremioReader
 username    = "anzhu@microsoft.com"
-token       = "deXyT5YhSQS5d74OfHsfpv+VOAwCkn2giWJbBmCODba8mxbfB5S4P0+oGcZxMQ=="
+token       = "token string"#<>
 dr          = DremioReader(username=username,token=token)
 
 #%%
