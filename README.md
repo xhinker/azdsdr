@@ -6,9 +6,9 @@
     - [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
     - [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
     - [Step 3. Configure driver](#step-3-configure-driver)
-    - [Sample Query](#sample-query)
+    - [Dremio Sample Query](#dremio-sample-query)
   - [Use Kusto Reader](#use-kusto-reader)
-    - [Sample Query](#sample-query-1)
+    - [Kusto Sample Query](#kusto-sample-query)
 
 This package includes data reader for DS to access data in a easy way. 
 
@@ -62,7 +62,7 @@ Please download the [dremio-connector](https://github.com/xhinker/azdsdr/tree/ma
 
 You can download the driver from [Dremio's ODBC Driver](https://www.dremio.com/drivers/odbc/) page. 
 
-### Sample Query
+### Dremio Sample Query
 
 ```python
 from azdsdr.readers import DremioReader
@@ -89,7 +89,7 @@ Sign in with Azure CLI so that you can run Kusto script without login everytime.
 az login
 ```
 
-### Sample Query
+### Kusto Sample Query
 
 ```python 
 from readers import KustoReader
