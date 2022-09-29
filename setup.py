@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='azdsdr',
-    version='1.220929.7',
+    version='1.220929.8',
     license='Apache License',
     author="Andrew Zhu",
     author_email='xhinker@hotmail.com',
@@ -13,5 +13,8 @@ setup(
     install_requires=[
         'pandas'
         ,'pyodbc'
+        ,'azure-cli'
+        ,'azure-kusto-data'
+        ,'zure-kusto-ingest'
     ],
 )

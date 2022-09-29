@@ -6,4 +6,10 @@ Covered data platforms
     * Dremio
     * Kusto
   
-## Prepare to use 
+## Prepare to use Dremio
+
+[TBD]
+
+## Prepare to use Kusto
+
+[TBD]

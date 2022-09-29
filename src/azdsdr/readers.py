@@ -1,6 +1,14 @@
 import pyodbc
 import pandas as pd
 import warnings
+from azure.kusto.data import (
+    KustoClient
+    ,KustoConnectionStringBuilder
+    ,ClientRequestProperties
+    ,DataFormat
+)
+from azure.kusto.data.helpers import dataframe_from_result_table
+from datetime import timedelta
 
 class DremioReader:
     def __init__(self,username,token,host = "dremio-mcds.trafficmanager.net") -> None:
@@ -36,10 +44,27 @@ class DremioReader:
             return pd.read_sql(sql_query,self.connection)
 
 class KustoReader:
-    def __init__(self) -> None:
+    def __init__(self,cluster="https://help.kusto.windows.net",db="Samples") -> None:
         '''
-        Initilize Kusto connection
+        Initilize Kusto connection with additional timeout settings
         '''
+        kcsb                = KustoConnectionStringBuilder.with_az_cli_authentication(cluster)
+        self.db = db
+        self.kusto_client   = KustoClient(kcsb)
+        self.properties     = ClientRequestProperties()
+        self.properties.set_option(self.properties.results_defer_partial_query_failures_option_name, True)
+        self.properties.set_option(self.properties.request_timeout_option_name, timedelta(seconds=60 * 60))
     
-    def run_kql():
-        pass
+    def run_kql(self,kql:str) -> pd.DataFrame:
+        '''
+        Run the input Kusto script on target cluster and database
+
+        Args:
+            kql (str): the Kusto script in plain string
+        
+        Returns:
+            pd.Dataframe: pandas Dataframe containing results of SQL query from Dremio
+        '''
+        r = self.kusto_client.execute(self.db,kql).primary_results[0]
+        r_df = dataframe_from_result_table(r)
+        return r_df
