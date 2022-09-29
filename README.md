@@ -43,7 +43,7 @@ Please download the [dremio-connector](https://github.com/xhinker/azdsdr/tree/ma
 - Add Dremio Connector
 - Configure as follows, with your own <alias>@host.com as the username.
 
-![](README/2022-09-29-13-26-26.png)
+![](https://github.com/xhinker/azdsdr/blob/main/README/2022-09-29-13-26-26.png)
 
 - Click Ok/Save
 
