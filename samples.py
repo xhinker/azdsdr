@@ -1,5 +1,5 @@
 #%% 
-from azdsdr import DremioReader
+from azdsdr.readers import DremioReader
 username    = "name@host.com"
 token       = "token string"
 dr          = DremioReader(username=username,token=token)
