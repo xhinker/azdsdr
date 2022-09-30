@@ -80,7 +80,6 @@ limit 10
 r = dr.run_sql(sql)
 ```
 
-
 ## Use Kusto Reader
 
 Sign in with Azure CLI so that you can run Kusto script without login everytime. 
