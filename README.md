@@ -9,6 +9,7 @@
     - [Dremio Sample Query](#dremio-sample-query)
   - [Use Kusto Reader](#use-kusto-reader)
     - [Kusto Sample Query](#kusto-sample-query)
+  - [Thanks](#thanks)
 
 This package includes data reader for DS to access data in a easy way. 
 
@@ -102,3 +103,7 @@ r = kr.run_kql(kql)
 ```
 
 The Kusto Reader is test in Windows 10, in theroy should also work in Linux and Mac. 
+
+## Thanks
+
+The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/kcm117). Glory and credits belong to KC. 
