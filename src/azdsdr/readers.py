@@ -77,6 +77,7 @@ class KustoReader:
 # region Cosmos
 import subprocess
 import time
+import os
 
 class CosmosReader:
     def __init__(self,scope_exe_path,client_account,vc_path) -> None:
@@ -113,6 +114,23 @@ class CosmosReader:
                 print("scope job is completed")
                 break
             print('still in processing')
+    
+    def download_file(self,source_file_path:str,target_file_path:str) -> None:
+        '''
+        Download target file from Cosmos
+        
+        Args:
+            source_file_path (str): the file put without vc path included. e.g.: /users/username/filename.ss
+            local_file_path (str): the full local file path. e.g.: c:/cosmos_folder/filename.ss
+        
+        Return: 
+            None
+        '''
+        vc_file_path    = self.vc_path + source_file_path
+        cmd             = f"{self.scope_exe_path} export {vc_file_path} {target_file_path} -delims \",\" -on useaadauthentication -u {self.client_account}"
+        print(">",cmd)
+        output_str = str(subprocess.run(cmd.split(' '),capture_output=True))
+        print(output_str)
 
 
 # endregion
