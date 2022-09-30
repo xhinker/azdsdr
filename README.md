@@ -1,5 +1,7 @@
 # AZDSDR - Data Scientist's Data Reader
 
+[![PyPI version](https://badge.fury.io/py/azdsdr.svg)](https://badge.fury.io/py/azdsdr)
+
 - [AZDSDR - Data Scientist's Data Reader](#azdsdr---data-scientists-data-reader)
   - [Installation](#installation)
   - [Use Dremimo Reader](#use-dremimo-reader)
@@ -17,6 +19,7 @@ Covered data platforms
 
 * Dremio
 * Kusto
+* Cosmos
 
 ## Installation
 
