@@ -70,8 +70,11 @@ You can download the driver from [Dremio's ODBC Driver](https://www.dremio.com/d
 
 ```python
 from azdsdr.readers import DremioReader
+import os
+
 username    = "name@host.com"
-token       = "token string"
+#token       = "token string"
+token       = os.environ.get("DREMIO_TOKEN") 
 dr          = DremioReader(username=username,token=token)
 
 sql = '''

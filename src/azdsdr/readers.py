@@ -127,7 +127,9 @@ class CosmosReader:
             None
         '''
         vc_file_path    = self.vc_path + source_file_path
-        cmd             = f"{self.scope_exe_path} export {vc_file_path} {target_file_path} -delims \",\" -on useaadauthentication -u {self.client_account}"
+        #cmd             = f"{self.scope_exe_path} export {vc_file_path} {target_file_path} -delims \",\" -on useaadauthentication -u {self.client_account}"
+        cmd             = f"{self.scope_exe_path} export {vc_file_path} {target_file_path} -on useaadauthentication -u {self.client_account}"
+
         print(">",cmd)
         output_str = str(subprocess.run(cmd.split(' '),capture_output=True))
         print(output_str)
