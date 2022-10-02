@@ -81,7 +81,7 @@ sql = '''
 select 
     * 
 from 
-    sample_table
+    [workspace].[folder].[tablename]
 limit 10
 '''
 r = dr.run_sql(sql)
