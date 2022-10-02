@@ -10,6 +10,7 @@
     - [Step 3. Configure driver](#step-3-configure-driver)
     - [Dremio Sample Query](#dremio-sample-query)
   - [Use Kusto Reader](#use-kusto-reader)
+    - [Azure CLI Authentication](#azure-cli-authentication)
     - [Kusto Sample Query](#kusto-sample-query)
   - [Thanks](#thanks)
 
@@ -88,6 +89,8 @@ r = dr.run_sql(sql)
 ```
 
 ## Use Kusto Reader
+
+### Azure CLI Authentication
 
 Before running the kusto query, please use 
 
