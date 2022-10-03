@@ -20,7 +20,6 @@ Covered data platforms
 
 * Dremio
 * Kusto
-* Cosmos
 
 ## Installation
 
