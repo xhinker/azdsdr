@@ -46,9 +46,21 @@ from azure.kusto.data import (
 )
 from azure.kusto.data.helpers import dataframe_from_result_table
 from datetime import timedelta
+from azure.kusto.ingest import (
+    QueuedIngestClient
+    ,IngestionProperties
+    ,FileDescriptor
+    ,BlobDescriptor
+)
+from azure.kusto.data.exceptions import KustoServiceError
+import traceback
 
 class KustoReader:
-    def __init__(self,cluster="https://help.kusto.windows.net",db="Samples") -> None:
+    def __init__(self
+                ,cluster            = "https://help.kusto.windows.net"
+                ,db                 = "Samples"
+                ,ingest_cluster_str = None
+                ) -> None:
         '''
         Initilize Kusto connection with additional timeout settings
         '''
@@ -58,6 +70,9 @@ class KustoReader:
         self.properties     = ClientRequestProperties()
         self.properties.set_option(self.properties.results_defer_partial_query_failures_option_name, True)
         self.properties.set_option(self.properties.request_timeout_option_name, timedelta(seconds=60 * 60))
+        if ingest_cluster_str:
+            self.ingest_cluster  = KustoConnectionStringBuilder.with_az_cli_authentication(ingest_cluster_str)
+            self.ingest_client   = QueuedIngestClient(self.ingest_cluster)
     
     def run_kql(self,kql:str) -> pd.DataFrame:
         '''
@@ -69,9 +84,126 @@ class KustoReader:
         Returns:
             pd.Dataframe: pandas Dataframe containing results of SQL query from Dremio
         '''
-        r = self.kusto_client.execute(self.db,kql).primary_results[0]
-        r_df = dataframe_from_result_table(r)
+        r_df = None
+        try:
+            r = self.kusto_client.execute(database = self.db,query=kql,properties=self.properties).primary_results[0]
+            r_df = dataframe_from_result_table(r)
+        except KustoServiceError as error:
+            print('something wrong')
+            print("Is semantic error:", error.is_semantic_error())
+            print("Has partial results:", error.has_partial_results())
+            traceback.print_exc()
+            return None
         return r_df
+    
+    def is_table_exist(self,table_name)->bool:
+        '''
+        Check if the target table is existed. 
+        '''
+        kql = f'''
+        .show database schema 
+        | where isnotempty(TableName)
+        | where TableName =~ '{table_name}'
+        | distinct TableName
+        '''
+        r = self.run_kql(kql)
+        if r.size>0:
+            return True
+        else:
+            return False
+    
+    def drop_table(self,table_name):
+        '''
+        Drop target table
+        '''
+        kql = f'''
+        .drop table {table_name}
+        '''
+        r = self.run_kql(kql)
+        return r
+
+    def create_table_from_csv(self,kusto_table_name,csv_file_path,kusto_folder=''):
+        '''
+        Create a new table based on the csv file structure
+        Steps
+        1. check target kusto table is exist
+        2. if yes, delete the target table
+        3. load csv file with pandas
+        4. extract column names
+        5, build the create table kql
+        '''
+        if self.is_table_exist(kusto_table_name):
+            self.drop_table(kusto_table_name)
+        
+        df          = pd.read_csv(csv_file_path)
+        columns     = list(df.head())
+        columns     = [c+":string" for c in columns]
+        columns_str = str(columns).replace('[','').replace(']','').replace("'",'')
+        kql         = f'''
+        .create table {kusto_table_name} (
+            {columns_str}
+        ) with (
+            folder = '{kusto_folder}'
+        )
+        '''
+        r = self.run_kql(kql)
+        return r
+    
+    def upload_df_to_kusto(self,target_table_name,df_data) -> None:
+        '''
+        Upload Pandas Dataframe data to Kusto table.
+        For large data, please use upload_csv_to_kusto function instead. 
+        '''
+        ingestion_props = IngestionProperties(
+            database                = self.db
+            ,table                  = target_table_name
+            ,data_format            = DataFormat.CSV
+            ,additional_properties  = {'ignoreFirstRecord': 'true'}
+        )
+        result = self.ingest_client.ingest_from_dataframe(df_data,ingestion_props)
+        print('ingest result',result)
+    
+    def upload_csv_to_kusto(self,target_table_name,csv_path) -> None:
+        '''
+        <TODO> check out why large file upload fail
+        '''
+        ingestion_props = IngestionProperties(
+            database                = self.db
+            ,table                  = target_table_name
+            ,data_format            = DataFormat.CSV
+            ,additional_properties  = {'ignoreFirstRecord': 'true'}
+        )
+        file_descriptor =  FileDescriptor(csv_path, 27368867)
+        result = self.ingest_client.ingest_from_file(file_descriptor,ingestion_properties=ingestion_props)
+        print('ingest result',result)
+    
+    def upload_csv_from_blob(self,target_table_name,blob_sas_url):
+        ingestion_props = IngestionProperties(
+            database                = self.db
+            ,table                  = target_table_name
+            ,data_format            = DataFormat.CSV
+            ,additional_properties  = {'ignoreFirstRecord': 'true'}
+        )
+        blob_descriptor = BlobDescriptor(blob_sas_url,27368867)
+        result = self.ingest_client.ingest_from_blob(blob_descriptor,ingestion_properties=ingestion_props)
+        print('ingest result',result)
+    
+    def check_table_data(self,target_table_name,check_times = 30,check_gap_min=2) -> None:
+        '''
+        check data existence of a table
+        '''
+        for _ in range(check_times):
+            kql     = f'''{target_table_name} | count'''
+            result  = self.run_kql(kql)
+            row_cnt = result["Count"].values[0]
+            if row_cnt > 0:
+                print('kusto ingest done')
+                return
+            print(f"table is empty, check again in {check_gap_min} mins")
+            time.sleep(60*check_gap_min)
+        
+        print('check done')
+
 # endregion
 
 # region Cosmos
@@ -84,7 +216,9 @@ import sys
 class CosmosReader:
     def __init__(self,scope_exe_path,client_account,vc_path) -> None:
         '''
-        Initialize the CosmosReader object
+        Initialize the CosmosReader object.
+
+        <TODO> detect if the os is Windows or not, if not, pop warning message
 
         Args:
             scope_exe_path (str): the path to the scope.exe file. 
@@ -141,12 +275,12 @@ class CosmosReader:
         print(output_str)
 
         # Remove "#Field:" from the header
-        with open(target_file_path,'r',encoding='utf-8') as f:
+        with open(target_file_path,'r') as f:
             data = f.readlines()
 
         data[0]=data[0].replace('#Field:','')
 
-        with open(target_file_path,'w',encoding='utf-8') as f:
+        with open(target_file_path,'w') as f:
             f.writelines(data)
         
         print('download done')
@@ -211,5 +345,82 @@ class CosmosReader:
 
         return df
 
+# endregion
+
+# region Azure Blob
+from azure.storage.blob import (
+    BlobServiceClient
+    ,ResourceTypes
+    ,AccountSasPermissions
+    ,generate_account_sas
+)
+from datetime import datetime,timedelta
+
+class AzureBlobReader:
+    '''
+    * Download file
+    * Upload file
+    * Get Blob SAS token
+    * Get Blob SAS Url
+    * Delete file
+    '''
+    def __init__(self,blob_conn_str,container_name) -> None:
+        self.connect_string         = blob_conn_str
+        self.blob_service_client    = BlobServiceClient.from_connection_string(self.connect_string)
+        self.container_client       = self.blob_service_client.get_container_client(container_name)
+
+    def download_file(self,blob_file_path,local_file_path) -> str:
+        '''
+        Download a single file
+        '''
+        blob_client = self.container_client.get_blob_client(blob_file_path)
+        with open(local_file_path,'wb') as f:
+            download_stream = blob_client.download_blob()
+            f.write(download_stream.readall())
+        return "download done"
+
+    def upload_file(self,blob_file_path,local_file_path):
+        '''
+        Upload a local file to blob storage
+        '''
+        try:
+            blob_client = self.container_client.get_blob_client(blob_file_path)
+            with open(local_file_path,'rb') as f:
+                blob_client.upload_blob(f,blob_type="BlockBlob")
+        except:
+            print('Upload file error')    
+
+    def get_blob_sas_token(self,expire_days = 1):
+        '''
+        Get the SAS token for current container
+        '''
+        sas_token = generate_account_sas(
+            self.blob_service_client.account_name,
+            account_key     = self.blob_service_client.credential.account_key,
+            resource_types  = ResourceTypes(object=True),
+            permission      = AccountSasPermissions(read=True),
+            expiry          = datetime.utcnow() + timedelta(days=expire_days)
+        )
+        return sas_token
+    
+    def get_blob_sas_url(self,blob_file_path,expire_days=1):
+        '''
+        Get the blob file SAS url with read permission. set expiration in one day. 
+        '''
+        sas_token       = self.get_blob_sas_token(expire_days=expire_days)
+        blob_client     = self.container_client.get_blob_client(blob_file_path)
+        url             = blob_client.url
+        blob_sas_url    = f'{url}?{sas_token}'
+        return blob_sas_url
+    
+    def delete_blob_file(self,blob_file_path):
+        '''
+        Delete a blob file 
+        '''
+        try:
+            blob_client = self.container_client.get_blob_client(blob_file_path)
+            blob_client.delete_blob()
+        except:
+            print('Delete file error')
 
 # endregion
