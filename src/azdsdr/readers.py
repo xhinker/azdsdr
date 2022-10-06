@@ -298,7 +298,12 @@ class CosmosReader:
         output_str = str(subprocess.run(cmd.split(' '),capture_output=True))
         print(output_str)
 
-    def scope_query(self,scope_script:str,temp_data_path="/users/anzhu/query_temp.ss") -> pd.DataFrame:
+    def scope_query(
+        self
+        ,scope_script:str
+        ,temp_data_path = "/users/anzhu/query_temp.ss"
+        ,temp_query_data = 'temp_query_data.csv'
+    ) -> pd.DataFrame:
         '''
         With run_scope and download_file_as_csv function, the function goes a
         step further to load the csv file into Pandas data frame.
@@ -313,35 +318,27 @@ class CosmosReader:
         Args
             scope_script (str): 
         '''
-        s = time.time()
+        temp_script_path = 'temp.script'
         # Step 0. 
         output_declare = f'''#DECLARE output string = "{temp_data_path}";'''
         scope_script = output_declare + scope_script
         print(scope_script)
 
         # Step 1.
-        with open('temp.script','w',encoding="utf-8") as f:
+        with open(temp_script_path,'w',encoding="utf-8") as f:
             f.write(scope_script)
         
         # Step 2. 
-        output_str = self.run_scope('temp.script')
-        #os.remove('temp.script')
+        output_str = self.run_scope(temp_script_path)
 
         # Step 3. 
         self.check_job_status(output_str)
 
         # Step 4. 
-        temp_query_data = 'temp_query_data.csv'
         self.download_file_as_csv(temp_data_path,temp_query_data)
 
         # Step 5. 
         df = pd.read_csv(temp_query_data)
-        #os.remove(temp_query_data)
-
-        # Step 6. delete data from cosmos, put in try except finall block. 
-        #self.delete_file_from_cosmos(temp_data_path)
-
-        print('take time',(time.time()-s))
 
         return df
 
@@ -353,8 +350,10 @@ from azure.storage.blob import (
     ,ResourceTypes
     ,AccountSasPermissions
     ,generate_account_sas
+    ,BlobBlock
 )
 from datetime import datetime,timedelta
+import uuid
 
 class AzureBlobReader:
     '''
@@ -367,6 +366,8 @@ class AzureBlobReader:
     def __init__(self,blob_conn_str,container_name) -> None:
         self.connect_string         = blob_conn_str
         self.blob_service_client    = BlobServiceClient.from_connection_string(self.connect_string)
+        self.blob_service_client.max_single_put_size = 4*1024*1024              # 4M
+        self.blob_service_client.timeout = 60*20                                # 10 mins
         self.container_client       = self.blob_service_client.get_container_client(container_name)
 
     def download_file(self,blob_file_path,local_file_path) -> str:
@@ -386,9 +387,33 @@ class AzureBlobReader:
         try:
             blob_client = self.container_client.get_blob_client(blob_file_path)
             with open(local_file_path,'rb') as f:
-                blob_client.upload_blob(f,blob_type="BlockBlob")
-        except:
+                blob_client.upload_blob(
+                    f
+                    ,blob_type="BlockBlob"
+                    ,overwrite=True
+                    ,max_concurrency=12)
+        except BaseException as err:
             print('Upload file error')    
+            print(err)
+    
+    def upload_file_chunks(self,blob_file_path,local_file_path):
+        try:
+            blob_client = self.container_client.get_blob_client(blob_file_path)
+            # upload data
+            block_list=[]
+            chunk_size=1024
+            with open(local_file_path,'rb') as f:
+                while True:
+                    read_data = f.read(chunk_size)
+                    if not read_data:
+                        break # done
+                    blk_id = str(uuid.uuid4())
+                    blob_client.stage_block(block_id=blk_id,data=read_data) 
+                    block_list.append(BlobBlock(block_id=blk_id))
+            blob_client.commit_block_list(block_list)
+        except BaseException as err:
+            print('Upload file error')    
+            print(err)
 
     def get_blob_sas_token(self,expire_days = 1):
         '''
@@ -422,5 +447,88 @@ class AzureBlobReader:
             blob_client.delete_blob()
         except:
             print('Delete file error')
+
+# endregion
+
+# region pipelines 
+
+class Pipelines:
+    def __init__(self) -> None:
+        pass
+
+    def cosmos_to_kusto(
+        self
+        ,scope_exe_path:str
+        ,vc_path:str
+        ,vc_temp_file_path:str
+        ,account:str
+        ,scope_script:str
+        ,local_csv_file_path:str
+        ,blob_connect_str:str
+        ,blob_container:str
+        ,blob_file_path:str
+        ,kusto_cluster:str
+        ,kusto_db:str
+        ,kusto_ingest_cluster:str
+        ,kusto_target_table_name:str
+        ,kusto_target_folder_name:str
+    ):
+        # extract data from cosmos to local csv
+        cr  = CosmosReader(
+            scope_exe_path  = scope_exe_path
+            ,client_account = account
+            ,vc_path        = vc_path
+        )
+        r   = cr.scope_query(
+            scope_script        = scope_script
+            ,temp_data_path     = vc_temp_file_path
+            ,temp_query_data    = local_csv_file_path
+        )
+        print('data returned from cosmos:',r)
+
+        # upload to Azure blob container
+        abr = AzureBlobReader(
+            blob_conn_str   = blob_connect_str
+            ,container_name = blob_container
+        )
+        abr.upload_file(
+            blob_file_path  = blob_file_path
+            ,local_file_path= local_csv_file_path
+        )
+        sas_url = abr.get_blob_sas_url(
+            blob_file_path  = blob_file_path
+        )
+        print(f'local data {local_csv_file_path} uploaded to Azure Blob {blob_file_path}')
+        
+        # ingest to kusto
+        kr = KustoReader(
+            cluster             = kusto_cluster
+            ,db                 = kusto_db
+            ,ingest_cluster_str = kusto_ingest_cluster
+        )
+        kr.create_table_from_csv(
+            kusto_table_name    = kusto_target_table_name
+            ,csv_file_path      = local_csv_file_path
+            ,kusto_folder       = kusto_target_folder_name 
+        )
+        print(f'kusto table {kusto_target_table_name} is createed based on the csv file {local_csv_file_path}')
+        kr.upload_csv_from_blob(
+            target_table_name   = kusto_target_table_name
+            ,blob_sas_url       = sas_url
+        )
+        kr.check_table_data(kusto_target_table_name)
+
+        # clean up files
+        # # clean up local csv 
+        import os
+        os.remove('temp.script')
+        os.remove(local_csv_file_path)
+        # # clean up cosmos csv
+        cr.delete_file_from_cosmos(vc_temp_file_path)
+        # # delete file from blob
+        abr.delete_blob_file(blob_file_path)
+        
+        print('all temp data cleared')
+        print('all done')
 
 # endregion
