@@ -339,7 +339,7 @@ class CosmosReader:
         #os.remove(temp_query_data)
 
         # Step 6. delete data from cosmos, put in try except finall block. 
-        self.delete_file_from_cosmos(temp_data_path)
+        #self.delete_file_from_cosmos(temp_data_path)
 
         print('take time',(time.time()-s))
 
