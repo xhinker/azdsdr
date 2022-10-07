@@ -401,7 +401,7 @@ class AzureBlobReader:
             blob_client = self.container_client.get_blob_client(blob_file_path)
             # upload data
             block_list=[]
-            chunk_size=1024
+            chunk_size=1024*1024*4
             with open(local_file_path,'rb') as f:
                 while True:
                     read_data = f.read(chunk_size)
@@ -414,7 +414,7 @@ class AzureBlobReader:
                     block_list.append(BlobBlock(block_id=blk_id))
             blob_client.commit_block_list(block_list)
         except BaseException as err:
-            print('Upload file error')    
+            print('Upload file error')
             print(err)
 
     def get_blob_sas_token(self,expire_days = 1):
