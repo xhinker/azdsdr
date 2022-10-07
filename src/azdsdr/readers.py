@@ -402,6 +402,7 @@ class AzureBlobReader:
             # upload data
             block_list=[]
             chunk_size=1024*1024*4
+            b_cnt = 0
             with open(local_file_path,'rb') as f:
                 while True:
                     read_data = f.read(chunk_size)
