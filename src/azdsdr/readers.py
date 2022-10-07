@@ -214,6 +214,9 @@ import os
 import sys
 
 class CosmosReader:
+    '''
+    The Cosmos Reader can only be used inside of Microsoft Corp Network
+    '''
     def __init__(self,scope_exe_path,client_account,vc_path) -> None:
         '''
         Initialize the CosmosReader object.
@@ -397,6 +400,9 @@ class AzureBlobReader:
             print(err)
     
     def upload_file_chunks(self,blob_file_path,local_file_path):
+        '''
+        Upload large file to blob
+        '''
         try:
             blob_client = self.container_client.get_blob_client(blob_file_path)
             # upload data
