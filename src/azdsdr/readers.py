@@ -389,7 +389,7 @@ class AzureBlobReader:
             with open(local_file_path,'rb') as f:
                 blob_client.upload_blob(
                     f
-                    #,blob_type="BlockBlob"
+                    ,blob_type="BlockBlob"
                     ,overwrite=True
                     ,max_concurrency=12)
         except BaseException as err:
@@ -401,12 +401,14 @@ class AzureBlobReader:
             blob_client = self.container_client.get_blob_client(blob_file_path)
             # upload data
             block_list=[]
-            chunk_size=1024*4
+            chunk_size=1024
             with open(local_file_path,'rb') as f:
                 while True:
                     read_data = f.read(chunk_size)
                     if not read_data:
                         break # done
+                    b_cnt = b_cnt+1
+                    print('block number:',b_cnt)
                     blk_id = str(uuid.uuid4())
                     blob_client.stage_block(block_id=blk_id,data=read_data) 
                     block_list.append(BlobBlock(block_id=blk_id))
@@ -491,7 +493,7 @@ class Pipelines:
             blob_conn_str   = blob_connect_str
             ,container_name = blob_container
         )
-        abr.upload_file_chunks(
+        abr.upload_file(
             blob_file_path  = blob_file_path
             ,local_file_path= local_csv_file_path
         )
@@ -519,16 +521,16 @@ class Pipelines:
         kr.check_table_data(kusto_target_table_name)
 
         # clean up files
-        # # # clean up local csv 
-        # import os
-        # os.remove('temp.script')
-        # os.remove(local_csv_file_path)
-        # # # clean up cosmos csv
-        # cr.delete_file_from_cosmos(vc_temp_file_path)
-        # # # delete file from blob
-        # abr.delete_blob_file(blob_file_path)
-        # print('all temp data cleared')
-
+        # # clean up local csv 
+        import os
+        os.remove('temp.script')
+        os.remove(local_csv_file_path)
+        # # clean up cosmos csv
+        cr.delete_file_from_cosmos(vc_temp_file_path)
+        # # delete file from blob
+        abr.delete_blob_file(blob_file_path)
+        
+        print('all temp data cleared')
         print('all done')
 
 # endregion
