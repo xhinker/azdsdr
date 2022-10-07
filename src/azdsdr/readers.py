@@ -385,7 +385,7 @@ class AzureBlobReader:
 
     def upload_file(self,blob_file_path,local_file_path):
         '''
-        Upload a local file to blob storage
+        Upload a local small file (< 9mb) to blob storage
         '''
         try:
             blob_client = self.container_client.get_blob_client(blob_file_path)
@@ -408,14 +408,11 @@ class AzureBlobReader:
             # upload data
             block_list=[]
             chunk_size=1024*1024*4
-            b_cnt = 0
             with open(local_file_path,'rb') as f:
                 while True:
                     read_data = f.read(chunk_size)
                     if not read_data:
                         break # done
-                    b_cnt = b_cnt+1
-                    print('block number:',b_cnt)
                     blk_id = str(uuid.uuid4())
                     blob_client.stage_block(block_id=blk_id,data=read_data) 
                     block_list.append(BlobBlock(block_id=blk_id))
@@ -500,7 +497,7 @@ class Pipelines:
             blob_conn_str   = blob_connect_str
             ,container_name = blob_container
         )
-        abr.upload_file(
+        abr.upload_file_chunks(
             blob_file_path  = blob_file_path
             ,local_file_path= local_csv_file_path
         )
