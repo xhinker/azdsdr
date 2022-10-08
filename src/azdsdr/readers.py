@@ -239,7 +239,7 @@ class CosmosReader:
         # check job status
         return output_str
     
-    def check_job_status(self,output_str,check_times = 30,check_gap_min=2):
+    def check_job_status(self,output_str,check_times = 60,check_gap_min=2):
         op_guid = output_str.split(',')[-2].split('\\r\\n')[0].split(':')[1].strip()
         print('op_guid:',op_guid)
         if len(op_guid) > 40:
