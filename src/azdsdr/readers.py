@@ -135,7 +135,7 @@ class KustoReader:
         if self.is_table_exist(kusto_table_name):
             self.drop_table(kusto_table_name)
         
-        df          = pd.read_csv(csv_file_path)
+        df          = pd.read_csv(csv_file_path,nrows=3)    # nrows = 3 can avoid read massive csv file and blow up memory
         columns     = list(df.head())
         columns     = [c+":string" for c in columns]
         columns_str = str(columns).replace('[','').replace(']','').replace("'",'')
@@ -479,62 +479,65 @@ class Pipelines:
         ,kusto_target_table_name:str
         ,kusto_target_folder_name:str
     ):
-        # extract data from cosmos to local csv
-        cr  = CosmosReader(
-            scope_exe_path  = scope_exe_path
-            ,client_account = account
-            ,vc_path        = vc_path
-        )
-        r   = cr.scope_query(
-            scope_script        = scope_script
-            ,temp_data_path     = vc_temp_file_path
-            ,temp_query_data    = local_csv_file_path
-        )
-        print('data returned from cosmos:',r)
+        try:
+            # extract data from cosmos to local csv
+            cr  = CosmosReader(
+                scope_exe_path  = scope_exe_path
+                ,client_account = account
+                ,vc_path        = vc_path
+            )
+            r   = cr.scope_query(
+                scope_script        = scope_script
+                ,temp_data_path     = vc_temp_file_path
+                ,temp_query_data    = local_csv_file_path
+            )
+            print('data returned from cosmos:',r)
 
-        # upload to Azure blob container
-        abr = AzureBlobReader(
-            blob_conn_str   = blob_connect_str
-            ,container_name = blob_container
-        )
-        abr.upload_file_chunks(
-            blob_file_path  = blob_file_path
-            ,local_file_path= local_csv_file_path
-        )
-        sas_url = abr.get_blob_sas_url(
-            blob_file_path  = blob_file_path
-        )
-        print(f'local data {local_csv_file_path} uploaded to Azure Blob {blob_file_path}')
-        
-        # ingest to kusto
-        kr = KustoReader(
-            cluster             = kusto_cluster
-            ,db                 = kusto_db
-            ,ingest_cluster_str = kusto_ingest_cluster
-        )
-        kr.create_table_from_csv(
-            kusto_table_name    = kusto_target_table_name
-            ,csv_file_path      = local_csv_file_path
-            ,kusto_folder       = kusto_target_folder_name 
-        )
-        print(f'kusto table {kusto_target_table_name} is createed based on the csv file {local_csv_file_path}')
-        kr.upload_csv_from_blob(
-            target_table_name   = kusto_target_table_name
-            ,blob_sas_url       = sas_url
-        )
-        kr.check_table_data(kusto_target_table_name)
+            # upload to Azure blob container
+            abr = AzureBlobReader(
+                blob_conn_str   = blob_connect_str
+                ,container_name = blob_container
+            )
+            abr.upload_file_chunks(
+                blob_file_path  = blob_file_path
+                ,local_file_path= local_csv_file_path
+            )
+            sas_url = abr.get_blob_sas_url(
+                blob_file_path  = blob_file_path
+            )
+            print(f'local data {local_csv_file_path} uploaded to Azure Blob {blob_file_path}')
+            
+            # ingest to kusto
+            kr = KustoReader(
+                cluster             = kusto_cluster
+                ,db                 = kusto_db
+                ,ingest_cluster_str = kusto_ingest_cluster
+            )
+            kr.create_table_from_csv(
+                kusto_table_name    = kusto_target_table_name
+                ,csv_file_path      = local_csv_file_path
+                ,kusto_folder       = kusto_target_folder_name 
+            )
+            print(f'kusto table {kusto_target_table_name} is createed based on the csv file {local_csv_file_path}')
+            kr.upload_csv_from_blob(
+                target_table_name   = kusto_target_table_name
+                ,blob_sas_url       = sas_url
+            )
+            kr.check_table_data(kusto_target_table_name)
 
-        # clean up files
-        # # clean up local csv 
-        import os
-        os.remove('temp.script')
-        os.remove(local_csv_file_path)
-        # # clean up cosmos csv
-        cr.delete_file_from_cosmos(vc_temp_file_path)
-        # # delete file from blob
-        abr.delete_blob_file(blob_file_path)
-        
-        print('all temp data cleared')
+        finally:
+            # clean up files
+            # # clean up local csv 
+            import os
+            os.remove('temp.script')
+            os.remove(local_csv_file_path)
+            # # clean up cosmos csv
+            cr.delete_file_from_cosmos(vc_temp_file_path)
+            # # delete file from blob
+            abr.delete_blob_file(blob_file_path)
+            
+            print('all temp data cleared')
+
         print('all done')
 
 # endregion
