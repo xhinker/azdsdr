@@ -55,7 +55,7 @@ Please download the [dremio-connector](https://github.com/xhinker/azdsdr/tree/ma
 ### Step 3. Configure driver
 - Go to Start Menu -> “ODBC Data Sources (64-bit)”.
 - Under User DSN, click “Add”.
-- Add Dremio Connector
+- Add Dremio Connector.
 - Configure as follows, with your own <alias>@host.com as the username.Do remember to replace the dremio host with your own host string. 
 
 ![](https://github.com/xhinker/azdsdr/blob/main/README/2022-09-29-13-26-26.png)
