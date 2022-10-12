@@ -35,6 +35,19 @@ The `-U` will help update your old version to the newest
 
 Or, you can clone the repository and copy over the `readers.py` file to your project folder.  
 
+The installation will also install all the dependance packages automatrically.
+
+* pandas
+* pyodbc
+* azure-cli
+* azure-kusto-data
+* azure-kusto-ingest
+* azure-storage-blob
+* matplotlib
+* ipython
+
+If you are working on a new build OS, the all in one installation will also save you time to install individual packages one by one. 
+
 ## Use Dremimo Reader
 
 ### Step 1. Install Dremio Connector
