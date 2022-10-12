@@ -45,6 +45,7 @@ The installation will also install all the dependance packages automatrically.
 * azure-storage-blob
 * matplotlib
 * ipython
+* ipykernel
 
 If you are working on a new build OS, the all-in-one installation will also save you time from installing individual packages one by one. 
 
@@ -66,6 +67,7 @@ Please download the [dremio-connector](https://github.com/xhinker/azdsdr/tree/ma
 - Click “New” under environment variables.  
 - Enter a new variable with name “DREMIO_TOKEN” and set the value to the PAT you generated earlier.  
 
+Note: you will have to log out your Windows account and log in again to take the new env variable take effort.
 
 ### Step 3. Configure driver
 - Go to Start Menu -> “ODBC Data Sources (64-bit)”.

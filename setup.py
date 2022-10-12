@@ -19,5 +19,6 @@ setup(
         ,'azure-storage-blob'
         ,'matplotlib'
         ,'ipython'
+        ,'ipykernel'
     ],
 )
