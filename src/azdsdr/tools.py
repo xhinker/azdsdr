@@ -6,13 +6,18 @@ class pd_tools:
     def __init__(self) -> None:
         pass
 
-    def display_all(self,df_data):
+    def display_all(self,df_data,top=-1):
         style = '''
         <style>.dataframe td { 
             text-align: left; 
             max-width: 400px;
         }</style>'''
-        display(HTML(style + df_data.to_html()))
+        if top == -1:
+            display(HTML(style + df_data.to_html()))
+        elif top>0:
+            display(HTML(style + df_data.head(top).to_html()))
+        else:
+            print('The top parameter should be larger than 0.')
 
 # endregion
 

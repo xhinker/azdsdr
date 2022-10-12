@@ -12,6 +12,8 @@
   - [Use Kusto Reader](#use-kusto-reader)
     - [Azure CLI Authentication](#azure-cli-authentication)
     - [Kusto Sample Query](#kusto-sample-query)
+  - [Data Tools](#data-tools)
+    - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
 
 This package includes data reader for DS to access data in a easy way. 
@@ -117,6 +119,26 @@ r = kr.run_kql(kql)
 ```
 
 The Kusto Reader is test in Windows 10, in theroy should also work in Linux and Mac. 
+
+
+## Data Tools
+
+### `display_all` Display all dataframe rows
+
+The IPython's display can display only limited rows of data. This tool can display **all** or **specified rows** of data. 
+
+```python
+from azdsdr.tools import pd_tools
+display_all = pd_tools().display_all
+
+#...prepare pd data
+
+# display all 
+display_all(pd_data)
+
+# display top 20 rows
+display_all(pd_data,top=20)
+```
 
 ## Thanks
 
