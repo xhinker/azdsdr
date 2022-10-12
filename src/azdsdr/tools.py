@@ -137,7 +137,7 @@ class vis_tools:
         ax.yaxis.set_tick_params(labelsize=self.label_size)
             
         for i,v in enumerate(y_list):
-            ax.text(v+y_max/20,i-0.2, self.human_format(v),**self.small_label_font)
+            ax.text(v+y_max/20,i-0.2, self.human_format(v))
             ax.set_xticks([])    
         
         ax.spines[['top','right','bottom']].set_visible(False)
