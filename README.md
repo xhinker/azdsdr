@@ -138,7 +138,7 @@ The Kusto Reader is test in Windows 10, in theroy should also work in Linux and 
 
 ### `display_all` Display all dataframe rows
 
-The IPython's display can display only limited rows of data. This tool can display **all** or **specified rows** of data. 
+The IPython's `display` can display only limited rows of data. This tool can display **all** or **specified rows** of data. 
 
 ```python
 from azdsdr.tools import pd_tools
