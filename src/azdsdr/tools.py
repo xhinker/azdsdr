@@ -19,26 +19,36 @@ class pd_tools:
 # region vis tools
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+import matplotlib
 
 class vis_tools:
-    def __init__(self) -> None:
-        rcParams['font.sans-serif']     = "Segoe UI"
-        rcParams['font.family']         = 'sans-serif'
+    def __init__(
+        self
+        ,w = 15
+        ,h = 10
+        ,font_family = 'sans-serif'
+        ,font_name = "Segoe UI"
+    ) -> None:
+        #rcParams['font.sans-serif']     = "Comic Sans MS"
+        rcParams['font.family']         = font_family
+        rcParams['font.sans-serif']     = font_name
         self.csfont                     = {'fontname':'Comic Sans MS'}
         self.hfont                      = {'fontname':'Helvetica'}
         self.msfont                     = {'fontname':'Segoe UI'}
         self.msfont_light               = {'fontname':'Segoe UI Light'}
-        self.label_text_font            = {'size':'20','weight':'bold','fontname':'Segoe UI'}
+        self.label_text_font            = {'size':'20','weight':'bold','fontname':'Segoe UI Light'}
         self.small_label_font           = {'size':'18','weight':'normal','fontname':'Segoe UI'}
         self.colors_seq                 = ['#003366','#A8C5E0','green','lime','sienna','violet']
         self.title_size                 = 20 
         self.axis_size                  = 18 
-        self.label_size                 = 18 
+        self.label_size                 = 12
         self.note_size                  = 18 
         self.dark_blue                  = "#003366"
         self.light_blue                 = "#A8C5E0"
+        self.size_w                     = w
+        self.size_h                     = h
 
-    def human_format(num):
+    def human_format(self,num):
         magnitude = 0 
         while abs(num) >= 1000:
             magnitude += 1 
@@ -47,41 +57,152 @@ class vis_tools:
         return '%.0f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
     def single_bar_chart(
-        title,x_axis_array,y_axis_array
-        ,size_w = 15
-        ,size_h = 10
+        self
+        ,title
+        ,x_list
+        ,y_list
         ,rotate_x = 30
     ):
+        '''
+        Show one set of bar chart from x and y input
+        '''
         fig,ax      = plt.subplots() 
-        fig.set_size_inches(size_w, size_h)
-        x_axis_len  = len(x_axis_array) 
+        fig.set_size_inches(self.size_w, self.size_h)
+        fig.autofmt_xdate(rotation=rotate_x)
+
+        x_axis_len  = len(x_list) 
         ax.bar(
             range(x_axis_len)
-            ,y_axis_array
+            ,y_list
             ,color="#003366"
             ,width = 0.2
         ) 
         ax.set_xticks(range(x_axis_len))
-        x_label_rotate = 0
-        #rotate x labels 
-        if x_axis_len>5:
-            x_label_rotate = rotate_x
-
-        ax.set_xticklabels(x_axis_array,rotation=x_label_rotate)
+        ax.set_xticklabels(x_list)
+        ax.xaxis.set_tick_params(labelsize=self.label_size)
+        ax.yaxis.set_tick_params(labelsize=self.label_size)
 
         # set style 
-        ax.set_title(title)
+        ax.set_title(
+            title
+            ,fontsize=self.title_size
+            #,**self.msfont
+        )
         ax.grid(False) 
         ax.set_facecolor('w') 
 
         #set label value
-        y_max = max(y_axis_array)
-        for i,v in enumerate(y_axis_array):
-            ax.text(i,v+y_max/100, 
-                    f"{v:,d}",
-                    color = '#080808',
-                    fontweight = 'normal',
-                    ha = 'center')
+        y_max = max(y_list)
+        for i,v in enumerate(y_list):
+            ax.text(i
+                    ,v+y_max/100
+                    ,f"{v:,d}"
+                    ,color = '#080808'
+                    ,fontweight = 'normal'
+                    ,ha = 'center'
+            )
+        
+        ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
         return ax 
+    
+    def single_barh_chart(
+        self
+        ,title
+        ,x_list                         # the labels data
+        ,y_list                         # the values data
+    ): 
+        fig,ax      = plt.subplots() 
+        fig.set_size_inches(self.size_w, self.size_h) 
+
+        x_list_index  = range(len(x_list))
+        ax.barh(x_list_index,y_list,color=self.dark_blue) 
+        ax.set_yticks(x_list_index)
+        ax.set_yticklabels(x_list)
+        
+        # set style 
+        ax.set_title(title,fontsize=self.title_size)
+        ax.grid(False) 
+        ax.set_facecolor('w') 
+
+        y_max       = max(y_list)
+        ax.xaxis.set_tick_params(labelsize=self.label_size)
+        ax.yaxis.set_tick_params(labelsize=self.label_size)
+
+        # for tick in ax.get_xticklabels():
+        #     tick.set_fontname("Segoe UI")
+        # for tick in ax.get_yticklabels():
+        #     tick.set_fontname("Segoe UI")
+            
+        for i,v in enumerate(y_list):
+            ax.text(v+y_max/20,i-0.2, self.human_format(v),**self.small_label_font)
+            ax.set_xticks([])    
+        
+        ax.spines[['top','right','bottom']].set_visible(False)
+
+        return ax 
+
+    def line1_chart(
+        self
+        ,title
+        ,x_list
+        ,y_list
+        ,line1_name = ''
+    ):
+        fig,ax          = plt.subplots() 
+        fig.set_size_inches(self.size_w, self.size_h)
+        fig.autofmt_xdate(rotation=45)
+
+        ax.set_title(
+            title
+            ,fontsize=self.title_size
+        )
+        ax.grid(False) 
+        ax.set_facecolor('w') 
+        ax.xaxis.set_tick_params(labelsize=self.label_size)
+        ax.yaxis.set_tick_params(labelsize=self.label_size)
+
+        x_label_index   = range(len(x_list))
+        ax.plot(x_label_index,y_list,color=self.dark_blue)
+        plt.xticks(x_label_index) #show all x labels
+        ax.set_xticklabels(x_list)
+        ax.set_ylim(bottom=0)
+
+        ax.text(max(x_label_index),y_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
+        #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
+        ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
+        return ax
+
+    def line2_chart(
+        self
+        ,title
+        ,x_list
+        ,y1_list
+        ,y2_list
+        ,line1_name = ''
+        ,line2_name = ''
+    ):
+        fig,ax          = plt.subplots() 
+        fig.set_size_inches(self.size_w, self.size_h)
+        fig.autofmt_xdate(rotation=45)
+
+        x_label_index   = range(len(x_list))
+
+        ax.set_title(title,fontsize=self.title_size,**self.msfont_light)
+        ax.grid(False) 
+        ax.set_facecolor('w') 
+        ax.xaxis.set_tick_params(labelsize=self.label_size)
+        ax.yaxis.set_tick_params(labelsize=self.label_size)
+
+        ax.plot(x_label_index,y1_list,color=self.dark_blue)
+        ax.plot(x_label_index,y2_list,color=self.light_blue)
+        plt.xticks(x_label_index)
+        ax.set_xticklabels(x_list,**self.msfont_light)
+        ax.set_ylim(bottom=0)
+
+        ax.text(max(x_label_index),y1_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
+        ax.text(max(x_label_index),y2_list[-1],line2_name,**self.label_text_font,color=self.light_blue)
+        #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
+        ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
+        return ax
 
 # endregion

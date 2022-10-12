@@ -17,5 +17,6 @@ setup(
         ,'azure-kusto-data'
         ,'azure-kusto-ingest'
         ,'azure-storage-blob'
+        ,'matplotlib'
     ],
 )
