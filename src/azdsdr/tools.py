@@ -111,10 +111,13 @@ class vis_tools:
         ,x_list                         # the labels data
         ,y_list                         # the values data
     ): 
-        fig,ax      = plt.subplots() 
+        '''
+        Show single set of horizontal bar chart
+        '''
+        fig,ax          = plt.subplots() 
         fig.set_size_inches(self.size_w, self.size_h) 
 
-        x_list_index  = range(len(x_list))
+        x_list_index    = range(len(x_list))
         ax.barh(x_list_index,y_list,color=self.dark_blue) 
         ax.set_yticks(x_list_index)
         ax.set_yticklabels(x_list)
@@ -124,14 +127,9 @@ class vis_tools:
         ax.grid(False) 
         ax.set_facecolor('w') 
 
-        y_max       = max(y_list)
+        y_max           = max(y_list)
         ax.xaxis.set_tick_params(labelsize=self.label_size)
         ax.yaxis.set_tick_params(labelsize=self.label_size)
-
-        # for tick in ax.get_xticklabels():
-        #     tick.set_fontname("Segoe UI")
-        # for tick in ax.get_yticklabels():
-        #     tick.set_fontname("Segoe UI")
             
         for i,v in enumerate(y_list):
             ax.text(v+y_max/20,i-0.2, self.human_format(v),**self.small_label_font)
