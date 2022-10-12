@@ -46,7 +46,7 @@ The installation will also install all the dependance packages automatrically.
 * matplotlib
 * ipython
 
-If you are working on a new build OS, the all-in-one installation will also save you time to install individual packages one by one. 
+If you are working on a new build OS, the all-in-one installation will also save you time from installing individual packages one by one. 
 
 ## Use Dremimo Reader
 
