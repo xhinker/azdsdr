@@ -190,7 +190,7 @@ class vis_tools:
 
         x_label_index   = range(len(x_list))
 
-        ax.set_title(title,fontsize=self.title_size,**self.msfont_light)
+        ax.set_title(title,fontsize=self.title_size)
         ax.grid(False) 
         ax.set_facecolor('w') 
         ax.xaxis.set_tick_params(labelsize=self.label_size)
