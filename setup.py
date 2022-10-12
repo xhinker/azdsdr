@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='azdsdr',
-    version='1.221010.1',
+    version='1.221011.1',
     license='Apache License',
     author="Andrew Zhu",
     author_email='xhinker@hotmail.com',
@@ -18,5 +18,6 @@ setup(
         ,'azure-kusto-ingest'
         ,'azure-storage-blob'
         ,'matplotlib'
+        ,'ipython'
     ],
 )
