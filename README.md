@@ -81,7 +81,7 @@ Note: you will have to log out your Windows account and log in again to take the
 
 **For Linux and Mac User**
 
-You can download the driver from [Dremio's ODBC Driver](https://www.dremio.com/drivers/odbc/) page. 
+You can download the driver from [Dremio's ODBC Driver](https://www.dremio.com/drivers/odbc/) page. It should be working in theory, haven't been test yet. 
 
 ### Dremio Sample Query
 

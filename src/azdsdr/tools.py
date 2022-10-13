@@ -46,7 +46,7 @@ class vis_tools:
         self.colors_seq                 = ['#003366','#A8C5E0','green','lime','sienna','violet']
         self.title_size                 = 20 
         self.axis_size                  = 18 
-        self.label_size                 = 12
+        self.label_size                 = 12 
         self.note_size                  = 18 
         self.dark_blue                  = "#003366"
         self.light_blue                 = "#A8C5E0"
