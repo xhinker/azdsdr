@@ -42,8 +42,8 @@ class vis_tools:
         self.hfont                      = {'fontname':'Helvetica'}
         self.msfont                     = {'fontname':'Segoe UI'}
         self.msfont_light               = {'fontname':'Segoe UI Light'}
-        self.label_text_font            = {'size':'20','weight':'bold','fontname':'Segoe UI Light'}
-        self.small_label_font           = {'size':'18','weight':'normal','fontname':'Segoe UI'}
+        self.label_text_font            = {'size':'20','weight':'bold'}
+        self.small_label_font           = {'size':'18','weight':'normal'}
         self.colors_seq                 = ['#003366','#A8C5E0','green','lime','sienna','violet']
         self.title_size                 = 20 
         self.axis_size                  = 18 
