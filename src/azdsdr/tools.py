@@ -200,7 +200,7 @@ class vis_tools:
         ax.plot(x_label_index,y1_list,color=self.dark_blue)
         ax.plot(x_label_index,y2_list,color=self.light_blue)
         plt.xticks(x_label_index)
-        ax.set_xticklabels(x_list,**self.msfont_light)
+        ax.set_xticklabels(x_list)
         ax.set_ylim(bottom=0)
 
         ax.text(max(x_label_index),y1_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
