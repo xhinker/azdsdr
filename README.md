@@ -70,7 +70,7 @@ After successufuly authenticated with AAD, you should be able to run the followi
 ### Kusto Sample Query
 
 ```python 
-from readers import KustoReader
+from azdsdr.readers import KustoReader
 
 cluster = "https://help.kusto.windows.net"
 db      = "Samples"
