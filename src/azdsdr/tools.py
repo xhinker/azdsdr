@@ -32,11 +32,12 @@ class vis_tools:
         ,w = 15
         ,h = 10
         ,font_family = 'sans-serif'
-        ,font_name = "Segoe UI"
+        ,font_name = None
     ) -> None:
         #rcParams['font.sans-serif']     = "Comic Sans MS"
-        rcParams['font.family']         = font_family
-        rcParams['font.sans-serif']     = font_name
+        if font_name:
+            rcParams['font.family']         = font_family
+            rcParams['font.sans-serif']     = font_name
         self.csfont                     = {'fontname':'Comic Sans MS'}
         self.hfont                      = {'fontname':'Helvetica'}
         self.msfont                     = {'fontname':'Segoe UI'}
