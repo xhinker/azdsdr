@@ -6,7 +6,7 @@ import warnings
 class DremioReader:
     def __init__(self,username,token,host = "dremio-mcds.trafficmanager.net") -> None:
         '''
-        Initilize the Dremio connetion, the connection object will be saved for sql queries
+        Initialize the Dremio connection, the connection object will be saved for sql queries
 
         Args:
             username (str): your dremio login email in format <alias>@microsoft.com
@@ -54,6 +54,7 @@ from azure.kusto.ingest import (
 )
 from azure.kusto.data.exceptions import KustoServiceError
 import traceback
+import time
 
 class KustoReader:
     def __init__(self
@@ -203,6 +204,36 @@ class KustoReader:
             time.sleep(60*check_gap_min)
         
         print('check done')
+    
+    def list_tables(self,folder_name=None) -> list:
+        '''
+        Return all table names from the current kusto database
+        '''
+        if folder_name:
+            kql = f'''.show database schema 
+            | where isnotempty(TableName) 
+            | where isempty(ColumnName) 
+            | where Folder contains "{folder_name}"
+            | project 
+                DatabaseName 
+                ,TableName 
+                ,Folder 
+                ,DocString 
+            | order by 
+                TableName asc''' 
+        else:
+            kql = '''.show database schema 
+            | where isnotempty(TableName)
+            | distinct 
+                DatabaseName 
+                ,TableName
+                ,Folder 
+                ,DocString
+            | order by 
+                TableName asc
+            '''
+        r = self.run_kql(kql)
+        return r
 
 # endregion
 
