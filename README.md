@@ -9,6 +9,7 @@
     - [Run any Kusto query](#run-any-kusto-query)
     - [Show Kusto tables](#show-kusto-tables)
     - [Create an empty Kusto table from a CSV file](#create-an-empty-kusto-table-from-a-csv-file)
+    - [Upload data to Kusto](#upload-data-to-kusto)
   - [Use Dremimo Reader](#use-dremimo-reader)
     - [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
     - [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
@@ -85,10 +86,10 @@ from azdsdr.readers import KustoReader
 
 cluster = "https://help.kusto.windows.net"
 db      = "Samples"
-kr = KustoReader(cluster=cluster,db=db)
+kr      = KustoReader(cluster=cluster,db=db)
 
-kql = "StormEvents | take 10"
-r = kr.run_kql(kql)
+kql     = "StormEvents | take 10"
+r       = kr.run_kql(kql)
 ```
 
 The function `run_kql` will return a Pandas Dataframe object hold by `r`. The `kr` object will be reused in the following samples.
@@ -97,14 +98,14 @@ The function `run_kql` will return a Pandas Dataframe object hold by `r`. The `k
 
 List all tables:
 
-```
+```python
 kr.list_tables()
 ```
 ![](README/2022-11-09-23-03-51.png)
 
 List tables with folder keyword: 
 
-```
+```python
 kr.list_tables(folder_name='Covid19')
 ```
 ![](README/2022-11-09-23-06-22.png)
@@ -126,6 +127,54 @@ kr.create_table_from_csv (
     ,kusto_folder       = folder_name
 )
 ```
+
+### Upload data to Kusto
+
+Before uploading your data to Kusto, please make sure you have the right table created to hold the data. Ideally, you can use the above `create_table_from_csv` to create an empty table for you. 
+
+To enable the data ingestion(upload), you should also initialize the KustoReader object with an additional `ingest_cluster_str` parameter. Here is a sample, you should ask your admin or doc to find out the ingestion cluster url. 
+
+```python
+cluster         = "https://help.kusto.windows.net"
+ingest_cluster  = "https://help-ingest.kusto.windows.net"
+db              = "Samples"
+kr              = KustoReader(cluster=cluster,db=db,ingest_cluster_str=ingest_cluster)
+```
+
+Upload Pandas Dataframe to Kusto:
+
+```python
+target_kusto_table  = 'kusto_table_name'
+df_data             = you_df_data
+kr.upload_df_to_kusto(
+    target_table_name = target_kusto_table
+    ,df_data          = df_data
+)
+```
+
+Upload CSV file to Kusto:
+
+```python
+target_kusto_table  = 'kusto_table_name'
+csv_path            = 'csv_file.csv'
+kr.upload_csv_to_kusto(
+    target_table_name = target_kusto_table
+    ,csv_path         = csv_path
+)
+```
+
+Upload Azure Blob CSV file to Kusto, this is the best and fast way to upload massive csv data to Kusto table. 
+
+```python
+target_kusto_table  = 'kusto_table_name'
+blob_sas_url = 'the sas url you generate from Azure portal or Azure Storage Explorer, or azdsdr'
+kr.upload_csv_from_blob (
+    target_table_name   = kusto_table_name
+    ,blob_sas_url       = blob_sas_url
+)
+```
+
+I will cover how to generate `blob_sas_url` in the Azure Blob Reader section. 
 
 ## Use Dremimo Reader
 
