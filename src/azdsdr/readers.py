@@ -505,12 +505,13 @@ class Pipelines:
             ,dremio_host
             ,azure_blob_container
         '''
-        self.kusto_cluster         = kwargs['kusto_cluster']
-        self.kusto_cluster_ingest  = kwargs['kusto_cluster_ingest']                   
-        self.kusto_db              = kwargs['kusto_db']   
-        self.dremio_user_name      = kwargs['dremio_user_name']           
-        self.dremio_host           = kwargs['dremio_host']       
-        self.azure_blob_container  = kwargs['azure_blob_container']                            
+        if kwargs:
+            self.kusto_cluster         = kwargs['kusto_cluster']
+            self.kusto_cluster_ingest  = kwargs['kusto_cluster_ingest']                   
+            self.kusto_db              = kwargs['kusto_db']   
+            self.dremio_user_name      = kwargs['dremio_user_name']           
+            self.dremio_host           = kwargs['dremio_host']       
+            self.azure_blob_container  = kwargs['azure_blob_container']                            
 
     def load_azure_blob_context(self):
         '''
