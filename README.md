@@ -1,12 +1,14 @@
-# AZDSDR - Data Scientist's Data Reader
+# Data Scientist's Data Reader - AZDSDR
 
 [![PyPI version](https://badge.fury.io/py/azdsdr.svg)](https://badge.fury.io/py/azdsdr)
 
-- [AZDSDR - Data Scientist's Data Reader](#azdsdr---data-scientists-data-reader)
+- [Data Scientist's Data Reader - AZDSDR](#data-scientists-data-reader---azdsdr)
   - [Installation](#installation)
   - [Use Kusto Reader](#use-kusto-reader)
     - [Azure CLI Authentication](#azure-cli-authentication)
-    - [Kusto Sample Query](#kusto-sample-query)
+    - [Run any Kusto query](#run-any-kusto-query)
+    - [Show Kusto tables](#show-kusto-tables)
+    - [Create an empty Kusto table from a CSV file](#create-an-empty-kusto-table-from-a-csv-file)
   - [Use Dremimo Reader](#use-dremimo-reader)
     - [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
     - [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
@@ -18,10 +20,21 @@
 
 This package includes data reader for DS to access data in a easy way. 
 
-Covered data platforms 
+Covered data platforms:
 
-* Dremio
 * Kusto
+* Azure Blob Storage
+* Dremio
+* Microsoft Cosmos (Not CosmosDD, the Microsoft Cosmos using Scope, now AKA Azure Data Lake)
+
+May cover in the future:
+
+* Databricks/Spark
+* Microsoft Synapse
+* Delta Lake
+* Postgresql
+* Microsoft SQL Server
+* SQLite
 
 ## Installation
 
@@ -49,8 +62,6 @@ The installation will also install all the dependance packages automatrically.
 
 If you are working on a new build OS, the all-in-one installation will also save you time from installing individual packages one by one. 
 
-
-
 ## Use Kusto Reader
 
 ### Azure CLI Authentication
@@ -65,9 +76,9 @@ To login into Azure using AAD authentication. An authentication refresh token is
 
 For More details, read [Sign in with Azure CLI](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli).
 
-After successufuly authenticated with AAD, you should be able to run the following code without any pop up auth request. 
+After successufuly authenticated with AAD, you should be able to run the following code without any pop up auth request. The Kusto Reader is test in Windows 10, also works in Linux and Mac. 
 
-### Kusto Sample Query
+### Run any Kusto query
 
 ```python 
 from azdsdr.readers import KustoReader
@@ -80,7 +91,41 @@ kql = "StormEvents | take 10"
 r = kr.run_kql(kql)
 ```
 
-The Kusto Reader is test in Windows 10, in theroy should also work in Linux and Mac. 
+The function `run_kql` will return a Pandas Dataframe object hold by `r`. The `kr` object will be reused in the following samples.
+
+### Show Kusto tables
+
+List all tables:
+
+```
+kr.list_tables()
+```
+![](README/2022-11-09-23-03-51.png)
+
+List tables with folder keyword: 
+
+```
+kr.list_tables(folder_name='Covid19')
+```
+![](README/2022-11-09-23-06-22.png)
+
+
+### Create an empty Kusto table from a CSV file
+
+This function can be used before uploading CSV data to Kusto table. Instead of manually creating a Kusto table from CSV schema, use this function to create a empty Kusto table based on CSV file automatically. 
+
+Besides, you can also specify the table's folder name. 
+
+```python
+kusto_table_name  = 'target_kusto_table'
+folder_name       = 'target_kusto_folder'
+csv_file_name     = 'local_csv_path'
+kr.create_table_from_csv (
+    kusto_table_name    = kusto_table_name
+    ,csv_file_path      = csv_file_name
+    ,kusto_folder       = folder_name
+)
+```
 
 ## Use Dremimo Reader
 
