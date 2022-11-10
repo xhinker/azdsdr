@@ -147,6 +147,7 @@ class KustoReader:
             folder = '{kusto_folder}'
         )
         '''
+        print(kql)
         r = self.run_kql(kql)
         return r
     
@@ -191,7 +192,8 @@ class KustoReader:
     
     def check_table_data(self,target_table_name,check_times = 30,check_gap_min=2) -> None:
         '''
-        check data existence of a table
+        check data existence of a table, by default check by every 2 mins. 
+        You can also change the check gap time by setting your `check_gap_min` value.
         '''
         for _ in range(check_times):
             kql     = f'''{target_table_name} | count'''
@@ -489,9 +491,81 @@ class AzureBlobReader:
 
 # region pipelines 
 
+from pathlib import Path
+import uuid
+
 class Pipelines:
-    def __init__(self) -> None:
-        pass
+    def __init__(self,**kwargs) -> None:
+        '''
+        kwargs:
+            kusto_cluster
+            ,kusto_cluster_ingest
+            ,kusto_db
+            ,dremio_user_name
+            ,dremio_host
+            ,azure_blob_container
+        '''
+        self.kusto_cluster         = kwargs['kusto_cluster']
+        self.kusto_cluster_ingest  = kwargs['kusto_cluster_ingest']                   
+        self.kusto_db              = kwargs['kusto_db']   
+        self.dremio_user_name      = kwargs['dremio_user_name']           
+        self.dremio_host           = kwargs['dremio_host']       
+        self.azure_blob_container  = kwargs['azure_blob_container']                            
+
+    def load_azure_blob_context(self):
+        '''
+        The function will load the secret blob connection str to the object context
+        If the constr is provided, the constr will override existing constr. 
+        
+        The connection string is stored in `.azureblob_constr` file locate in the home folder.
+
+        If no `.azureblob_constr` exists. raise an error message. 
+        '''
+        con_str_path    = Path.home() / '.azureblob_constr'
+
+        if not Path.exists(con_str_path):
+            print('No Azure Blob connection ')
+            sys.exit(0)
+
+        with open(con_str_path,'r') as f:
+            con_str = f.read()
+
+        self.abr = AzureBlobReader(
+            blob_conn_str   = con_str
+            ,container_name = self.azure_blob_container
+        )
+        print('Azure blob Reader is ready')
+    
+    def load_dremio_context(self):
+        '''
+        The function will load Dremio token from configure file .dremio_token.
+        '''
+        con_str_path    = Path.home() / '.dremio_token'
+        
+        if not Path.exists(con_str_path):
+            print('No dremio token detected, please double check ~/.dremio_token file')
+            sys.exit(0)
+        
+        with open(con_str_path,'r') as f:
+            token = f.read()
+        
+        self.dr  = DremioReader(
+            username    = self.dremio_user_name
+            ,token      = token
+            ,host       = self.dremio_host
+        )
+        print('Dremio Reader object is ready')
+    
+    def load_kusto_context(self):
+        '''
+        The function will prepare the Kusto Reader object.
+        '''
+        self.kr = KustoReader(
+            cluster             = self.kusto_cluster
+            ,db                 = self.kusto_db
+            ,ingest_cluster_str = self.kusto_cluster_ingest
+        )
+        print('Kusto Reader is ready')
 
     def cosmos_to_kusto(
         self
@@ -510,6 +584,9 @@ class Pipelines:
         ,kusto_target_table_name:str
         ,kusto_target_folder_name:str
     ):
+        '''
+        Run cosmos scope script and save data to Kusto
+        '''
         try:
             # extract data from cosmos to local csv
             cr  = CosmosReader(
@@ -570,5 +647,63 @@ class Pipelines:
             print('all temp data cleared')
 
         print('all done')
+
+    def dremio_to_kusto(
+        self
+        ,dremio_sql
+        ,kusto_table_name
+        ,folder_name
+    ):
+        '''
+        The function will execute the input dremio sql, and upload data to kusto.
+        1. Execute the SQL to store data in pandas dataframe object
+        2. Save df data to csv file, without index included
+        3. Upload the csv file to Azure blob
+        4. Create empty kusto table based on local csv file
+        5. Get the Azure blob sas url
+        6. Ingest data to Kusto from Azure blob
+        7. Check data existing
+        8. Finally, remove local csv file, remove azure blob file. 
+        '''
+        try:
+            self.load_azure_blob_context()
+            self.load_dremio_context()
+            self.load_kusto_context()
+            # 1. Execute the SQL to store data in pandas dataframe object
+            r_df = self.dr.run_sql(dremio_sql)
+            # 2. Save df data to csv file, without index included
+            csv_file_name = f"{uuid.uuid1()}.csv"
+            r_df.to_csv(csv_file_name,index=False)
+            # 3. Upload the csv file to Azure blob
+            self.abr.upload_file_chunks(blob_file_path=csv_file_name,local_file_path=csv_file_name)
+            # 4. Create empty kusto table based on local csv file
+            self.kr.create_table_from_csv (
+                kusto_table_name    = kusto_table_name
+                ,csv_file_path      = csv_file_name
+                ,kusto_folder       = folder_name
+            )
+            # 5. Get the Azure blob sas url
+            blob_sas_url = self.abr.get_blob_sas_url (
+                blob_file_path=csv_file_name
+            )
+            # 6. Ingest data to Kusto from Azure blob
+            self.kr.upload_csv_from_blob (
+                target_table_name   = kusto_table_name
+                ,blob_sas_url       = blob_sas_url
+            )
+            # 7. Check data existing
+            self.kr.check_table_data(
+                target_table_name   = kusto_table_name
+                ,check_times        = 30
+                ,check_gap_min      = 2      
+            )
+        finally:
+            # 8. Finally, remove local csv file, remove azure blob file. 
+            os.remove(csv_file_name)
+            self.abr.delete_blob_file(csv_file_name)
+
+        print('all done')
+
+
 
 # endregion
