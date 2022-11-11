@@ -1,8 +1,8 @@
-# Data Scientist's Data Reader - AZDSDR
+# Andrew's all-in-one data reader - AZDSDR
 
 [![PyPI version](https://badge.fury.io/py/azdsdr.svg)](https://badge.fury.io/py/azdsdr)
 
-- [Data Scientist's Data Reader - AZDSDR](#data-scientists-data-reader---azdsdr)
+- [Andrew's all-in-one data reader - AZDSDR](#andrews-all-in-one-data-reader---azdsdr)
   - [Installation](#installation)
   - [Use Kusto Reader](#use-kusto-reader)
     - [Azure CLI Authentication](#azure-cli-authentication)

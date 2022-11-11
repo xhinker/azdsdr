@@ -11,7 +11,8 @@ setup(
     url='https://github.com/xhinker/azdsdr',
     keywords='DS Data Reader',
     install_requires=[
-        'pandas'
+        'numpy'
+        ,'pandas'
         ,'pyodbc'
         ,'azure-cli'
         ,'azure-kusto-data'
