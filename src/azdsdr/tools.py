@@ -18,7 +18,19 @@ class pd_tools:
             display(HTML(style + df_data.head(top).to_html()))
         else:
             print('The top parameter should be larger than 0.')
-
+    
+    def to_HTML(self,df_data,top=-1):
+        style = '''
+        <style>.dataframe td { 
+            text-align: left; 
+            max-width: 400px;
+        }</style>'''
+        if top == -1:
+            return HTML(style + df_data.to_html())
+        elif top>0:
+            return HTML(style + df_data.head(top).to_html())
+        else:
+            print('The top parameter should be larger than 0.')
 # endregion
 
 # region vis tools
