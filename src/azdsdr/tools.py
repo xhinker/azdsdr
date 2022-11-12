@@ -26,9 +26,9 @@ class pd_tools:
             max-width: 400px;
         }</style>'''
         if top == -1:
-            return HTML(style + df_data.to_html()).data
+            return HTML(style + df_data.to_html())
         elif top>0:
-            return HTML(style + df_data.head(top).to_html()).data
+            return HTML(style + df_data.head(top).to_html())
         else:
             print('The top parameter should be larger than 0.')
 # endregion
