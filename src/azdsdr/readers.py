@@ -70,7 +70,7 @@ class KustoReader:
         self.kusto_client   = KustoClient(kcsb)
         self.properties     = ClientRequestProperties()
         self.properties.set_option(self.properties.results_defer_partial_query_failures_option_name, True)
-        self.properties.set_option(self.properties.request_timeout_option_name, timedelta(seconds=60 * 60))
+        self.properties.set_option(self.properties.request_timeout_option_name, timedelta(seconds=60 * 60 * 2))
         if ingest_cluster_str:
             self.ingest_cluster  = KustoConnectionStringBuilder.with_az_cli_authentication(ingest_cluster_str)
             self.ingest_client   = QueuedIngestClient(self.ingest_cluster)
