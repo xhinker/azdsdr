@@ -26,7 +26,7 @@ Covered data platforms:
 * Kusto
 * Azure Blob Storage
 * Dremio
-* Microsoft Cosmos (Not CosmosDD, the Microsoft Cosmos using Scope, now AKA Azure Data Lake)
+* Microsoft Cosmos (Not Azure Cosmos DB, the Microsoft Cosmos using Scope, now AKA Azure Data Lake)
 
 May cover in the future:
 
