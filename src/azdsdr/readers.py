@@ -1,10 +1,10 @@
 # region Dremio
-import pyodbc
 import pandas as pd
 import warnings
 
 class DremioReader:
     def __init__(self,username,token,host = "dremio-mcds.trafficmanager.net") -> None:
+        import pyodbc
         '''
         Initialize the Dremio connection, the connection object will be saved for sql queries
 
