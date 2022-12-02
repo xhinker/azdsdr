@@ -1,9 +1,26 @@
+# region common packages import and settings
+from pathlib import Path
+import uuid
+import json
+
+config_file_path = Path.home() / '.azdsdr_conf.json'
+with open(config_file_path,'r') as f:
+    config_obj = json.load(f)
+# endregion
+
 # region Dremio
 import pandas as pd
 import warnings
 
 class DremioReader:
-    def __init__(self,username,token,host = "dremio-mcds.trafficmanager.net") -> None:
+    def __init__(
+        self
+        ,username   = None
+        ,token      = None
+        ,host       = "dremio-mcds.trafficmanager.net"
+        ,port       = 31010
+        ,driver     = "Dremio Connector"
+    ) -> None:
         import pyodbc
         '''
         Initialize the Dremio connection, the connection object will be saved for sql queries
@@ -11,16 +28,21 @@ class DremioReader:
         Args:
             username (str): your dremio login email in format <alias>@microsoft.com
             token (str): steps to generate the token: click username -> Account Settings -> Personal Access Tokens
+            host (str): your target dremio host
+            port (int): the port to connect dremko, default value set as 31010
         '''
-        port    = 31010
-        uid     = username
-        token   = token
-        driver  = "Dremio Connector"
+        # load token from configuration file 
+        if not token:
+            token = config_obj['dremio_token']
 
-        self.connection = pyodbc.connect(
-            f"Driver={driver};ConnectionType=Direct;HOST={host};PORT={port};AuthenticationType=Plain;UID={uid};PWD={token};ssl=1"
-            ,autocommit=True
-        )
+        try:
+            self.connection = pyodbc.connect(
+                f"Driver={driver};ConnectionType=Direct;HOST={host};PORT={port};AuthenticationType=Plain;UID={username};PWD={token};ssl=1"
+                ,autocommit=True
+            )
+        except:
+            self.connection = None
+            raise Exception('Connect to dremio via pyodbc error. Please check host, port, username and Dremio token.')
 
     def run_sql(self,sql_query:str) -> pd.DataFrame:
         '''
@@ -389,18 +411,25 @@ from azure.storage.blob import (
     ,BlobBlock
 )
 from datetime import datetime,timedelta
-import uuid
 
 class AzureBlobReader:
     '''
+    Functions from this class support the following Features: 
     * Download file
     * Upload file
     * Get Blob SAS token
     * Get Blob SAS Url
     * Delete file
     '''
-    def __init__(self,blob_conn_str,container_name) -> None:
-        self.connect_string         = blob_conn_str
+    def __init__(self,container_name,blob_conn_str=None) -> None:
+        if blob_conn_str:
+            self.connect_string         = blob_conn_str
+        else:
+            # get connect_string from configure file
+            config_path = Path.home() / '.azdsdr_conf.json'
+            with open(config_path,'r') as f:
+                self.connect_string = json.load(f)['azure_blob_connstr']
+
         self.blob_service_client    = BlobServiceClient.from_connection_string(self.connect_string)
         #self.blob_service_client.max_single_put_size = 4*1024*1024              # 4M
         #self.blob_service_client.timeout = 60*20                                # 10 mins
@@ -491,9 +520,6 @@ class AzureBlobReader:
 
 # region pipelines 
 
-from pathlib import Path
-import uuid
-
 class Pipelines:
     def __init__(self,**kwargs) -> None:
         '''
@@ -506,12 +532,12 @@ class Pipelines:
             ,azure_blob_container
         '''
         if kwargs:
-            self.kusto_cluster         = kwargs['kusto_cluster']
-            self.kusto_cluster_ingest  = kwargs['kusto_cluster_ingest']                   
-            self.kusto_db              = kwargs['kusto_db']   
-            self.dremio_user_name      = kwargs['dremio_user_name']           
-            self.dremio_host           = kwargs['dremio_host']       
-            self.azure_blob_container  = kwargs['azure_blob_container']                            
+            self.kusto_cluster         = kwargs.get('kusto_cluster','')
+            self.kusto_cluster_ingest  = kwargs.get('kusto_cluster_ingest','')                   
+            self.kusto_db              = kwargs.get('kusto_db','')
+            self.dremio_user_name      = kwargs.get('dremio_user_name','')           
+            self.dremio_host           = kwargs.get('dremio_host','')       
+            self.azure_blob_container  = kwargs.get('azure_blob_container','')                            
 
     def load_azure_blob_context(self):
         '''
@@ -522,14 +548,15 @@ class Pipelines:
 
         If no `.azureblob_constr` exists. raise an error message. 
         '''
-        con_str_path    = Path.home() / '.azureblob_constr'
+        con_str_path    = Path.home() / '.azdsdr_conf.json'
 
         if not Path.exists(con_str_path):
-            print('No Azure Blob connection ')
+            print('no azdsdr configuration file exists')
             sys.exit(0)
 
         with open(con_str_path,'r') as f:
-            con_str = f.read()
+            #con_str = f.read()
+            con_str = json.load(f)['azure_blob_connstr']
 
         self.abr = AzureBlobReader(
             blob_conn_str   = con_str
@@ -704,5 +731,88 @@ class Pipelines:
             self.abr.delete_blob_file(csv_file_name)
 
         print('all done')
+    
+    def kusto_to_csv(
+        self
+        ,input_kql
+        ,output_csv_file_name
+    ):
+        '''
+        The function will 
+        1. execute plain KQL(without .export async to csv). 
+        2. output data to Azure blob storage as csv file.
+        3. download data from azure blob storage to local file path
 
+        Args:
+            input_kql (str): the kusto script that generate the dataset
+            output_csv_path (str): the local csv file path (absolute or relative path)
+        
+        Returns: 
+            str: the execution status of the function. 
+        
+        Example: 
+            [TODO]
+        '''
+        self.load_kusto_context()
+        self.load_azure_blob_context()
+        # step 1. load Azure blob key str from configure file
+        con_str_path    = Path.home() / '.azdsdr_conf.json'
+        if not Path.exists(con_str_path):
+            print('No Azure Blob connection ')
+            sys.exit(0)
+
+        with open(con_str_path,'r') as f:
+            conf_obj = json.load(f)
+
+        try:
+            azure_blob_key = conf_obj['azure_blob_key']
+            azure_blob_account = conf_obj['azure_blob_connstr'].split(';')[1].replace('AccountName=','')
+            print('azure_blob_account',azure_blob_account)
+        except:
+            print('get azure blob key error')
+
+        # get the 
+
+        temp_name = str(uuid.uuid4())
+        
+        kusto_head = f'''.export async to csv(
+            h@"https://{azure_blob_account}.blob.core.windows.net:443//{self.azure_blob_container};{azure_blob_key}"
+        ) with (
+            sizeLimit        = 1000000000
+            ,namePrefix      = {temp_name}
+            ,includeHeaders  = all
+            ,encoding        = UTF8NoBOM
+            ,distributed     = false
+        )
+        <|
+        '''
+
+        try:
+            kql = f"""{kusto_head}{input_kql}"""
+            print(kql)
+            # how to detect kusto run status? 
+            r = self.kr.run_kql(kql)
+            op_id = r['OperationId'][0]
+            print(op_id)
+
+            # use a loop to check the status of the kusto execution
+            check_kql = f".show operations {op_id}"
+            while(True):
+                r = self.kr.run_kql(check_kql)
+                time.sleep(1)
+                state = r['State'][0]
+                if state == "Completed":
+                    print('Kusto export done')
+                    break
+            
+            print('Kusto export to Azure Blob done.')
+
+            # download blob file
+            blob_file_path = f"{temp_name}_1.csv"
+            self.abr.download_file(blob_file_path=blob_file_path,local_file_path=output_csv_file_name)
+        finally:
+            # delete blob temp file
+            self.abr.delete_blob_file(blob_file_path=blob_file_path)
+
+        print('Kusto to CSV done!')
 # endregion
