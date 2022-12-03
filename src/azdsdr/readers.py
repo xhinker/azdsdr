@@ -576,7 +576,6 @@ class AzureBlobReader:
 # endregion
 
 # region pipelines 
-
 class Pipelines:
     def __init__(self,**kwargs) -> None:
         '''
