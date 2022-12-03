@@ -3,10 +3,23 @@ from pathlib import Path
 import uuid
 import json
 
+# region prepare config
 config_file_path = Path.home() / '.azdsdr_conf.json'
+
+# make sure the existence of a configure
+if not Path.exists(config_file_path):
+    with open(config_file_path,'w') as f:
+        f.write("{}")
+
 with open(config_file_path,'r') as f:
     config_obj = json.load(f)
-# endregion
+
+def update_config(key,value):
+    config_obj[key] = value
+    config_obj_json = json.dumps(config_obj)
+    with open(config_file_path,'w') as f:
+        f.write(config_obj_json)
+# end region
 
 # region Dremio
 import pandas as pd
@@ -15,7 +28,7 @@ import warnings
 class DremioReader:
     def __init__(
         self
-        ,username   = None
+        ,username
         ,token      = None
         ,host       = "dremio-mcds.trafficmanager.net"
         ,port       = 31010
@@ -27,14 +40,32 @@ class DremioReader:
 
         Args:
             username (str): your dremio login email in format <alias>@microsoft.com
-            token (str): steps to generate the token: click username -> Account Settings -> Personal Access Tokens
+            token (str): steps to generate the token: click username -> Account Settings -> Personal Access Tokens. 
+                         The token need to be provided at the first time using it. the token will be cached in file 
+                         `~/.azdsdr_conf.json` file.
             host (str): your target dremio host
             port (int): the port to connect dremko, default value set as 31010
+            driver (str): the odbc driver name you give when you setup the Dremio odbc driver. 
+        
+        Example: 
+            ```
+            from azdsdr.readers import DremioReader
+            username    = "abc@abc.com"
+            dr          = DremioReader(username=username)
+            ```
         '''
-        # load token from configuration file 
+        # load token from configuration file if token is not provided. 
         if not token:
             token = config_obj['dremio_token']
-
+        else: 
+            # the token is provided in the parameter. add or update the original token
+            update_config('dremio_token',token)
+        
+        # raise exception if no token is provided. 
+        if not token:
+            raise Exception('No dremio token is found from config file either parameter.')
+        
+        # if no token is provided
         try:
             self.connection = pyodbc.connect(
                 f"Driver={driver};ConnectionType=Direct;HOST={host};PORT={port};AuthenticationType=Plain;UID={username};PWD={token};ssl=1"
@@ -83,6 +114,7 @@ class KustoReader:
                 ,cluster            = "https://help.kusto.windows.net"
                 ,db                 = "Samples"
                 ,ingest_cluster_str = None
+                ,timeout_hours      = 1
                 ) -> None:
         '''
         Initilize Kusto connection with additional timeout settings
@@ -92,20 +124,21 @@ class KustoReader:
         self.kusto_client   = KustoClient(kcsb)
         self.properties     = ClientRequestProperties()
         self.properties.set_option(self.properties.results_defer_partial_query_failures_option_name, True)
-        self.properties.set_option(self.properties.request_timeout_option_name, timedelta(seconds=60 * 60 * 2))
+        self.properties.set_option(self.properties.request_timeout_option_name, timedelta(seconds=60 * 60 * timeout_hours))
         if ingest_cluster_str:
             self.ingest_cluster  = KustoConnectionStringBuilder.with_az_cli_authentication(ingest_cluster_str)
             self.ingest_client   = QueuedIngestClient(self.ingest_cluster)
     
     def run_kql(self,kql:str) -> pd.DataFrame:
         '''
-        Run the input Kusto script on target cluster and database
+        Run the input Kusto script on target cluster and database, This function
+        will return the first result set of execution. 
 
         Args:
             kql (str): the Kusto script in plain string
         
         Returns:
-            pd.Dataframe: pandas Dataframe containing results of SQL query from Dremio
+            pd.Dataframe: pandas Dataframe containing results of Kusto.
         '''
         r_df = None
         try:
@@ -118,6 +151,30 @@ class KustoReader:
             traceback.print_exc()
             return None
         return r_df
+
+    def run_kql_all(self,kql:str) -> list:
+        '''
+        Run the input Kusto script on target cluster and database, This function
+        will return all result set
+
+        Args:
+            kql (str): the Kusto script in plain string
+        
+        Returns:
+            list: list of pd.Dataframe.
+        '''
+        r_df_list = []
+        try:
+            r_set = self.kusto_client.execute(database = self.db,query=kql,properties=self.properties).primary_results
+            for r in r_set:
+                r_df_list.append(dataframe_from_result_table(r))
+        except KustoServiceError as error:
+            print('something wrong')
+            print("Is semantic error:", error.is_semantic_error())
+            print("Has partial results:", error.has_partial_results())
+            traceback.print_exc()
+            return None
+        return r_df_list
     
     def is_table_exist(self,table_name)->bool:
         '''
@@ -424,11 +481,11 @@ class AzureBlobReader:
     def __init__(self,container_name,blob_conn_str=None) -> None:
         if blob_conn_str:
             self.connect_string         = blob_conn_str
+            # update the azure blob connection string with the newest one
+            update_config('azure_blob_connstr',blob_conn_str)
         else:
             # get connect_string from configure file
-            config_path = Path.home() / '.azdsdr_conf.json'
-            with open(config_path,'r') as f:
-                self.connect_string = json.load(f)['azure_blob_connstr']
+            self.connect_string = config_obj['azure_blob_connstr']
 
         self.blob_service_client    = BlobServiceClient.from_connection_string(self.connect_string)
         #self.blob_service_client.max_single_put_size = 4*1024*1024              # 4M
@@ -548,15 +605,7 @@ class Pipelines:
 
         If no `.azureblob_constr` exists. raise an error message. 
         '''
-        con_str_path    = Path.home() / '.azdsdr_conf.json'
-
-        if not Path.exists(con_str_path):
-            print('no azdsdr configuration file exists')
-            sys.exit(0)
-
-        with open(con_str_path,'r') as f:
-            #con_str = f.read()
-            con_str = json.load(f)['azure_blob_connstr']
+        con_str = config_obj['azure_blob_connstr']
 
         self.abr = AzureBlobReader(
             blob_conn_str   = con_str
@@ -568,14 +617,7 @@ class Pipelines:
         '''
         The function will load Dremio token from configure file .dremio_token.
         '''
-        con_str_path    = Path.home() / '.dremio_token'
-        
-        if not Path.exists(con_str_path):
-            print('No dremio token detected, please double check ~/.dremio_token file')
-            sys.exit(0)
-        
-        with open(con_str_path,'r') as f:
-            token = f.read()
+        token = config_obj['dremio_token']
         
         self.dr  = DremioReader(
             username    = self.dremio_user_name
@@ -755,24 +797,15 @@ class Pipelines:
         '''
         self.load_kusto_context()
         self.load_azure_blob_context()
-        # step 1. load Azure blob key str from configure file
-        con_str_path    = Path.home() / '.azdsdr_conf.json'
-        if not Path.exists(con_str_path):
-            print('No Azure Blob connection ')
-            sys.exit(0)
-
-        with open(con_str_path,'r') as f:
-            conf_obj = json.load(f)
-
+        # load Azure blob key str from configure file
         try:
-            azure_blob_key = conf_obj['azure_blob_key']
-            azure_blob_account = conf_obj['azure_blob_connstr'].split(';')[1].replace('AccountName=','')
+            azure_blob_key = config_obj['azure_blob_key']
+            azure_blob_account = config_obj['azure_blob_connstr'].split(';')[1].replace('AccountName=','')
             print('azure_blob_account',azure_blob_account)
         except:
-            print('get azure blob key error')
+            print('get azure blob key and connection string error')
 
-        # get the 
-
+        # temp name for azure blob 
         temp_name = str(uuid.uuid4())
         
         kusto_head = f'''.export async to csv(
