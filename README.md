@@ -104,6 +104,21 @@ r       = kr.run_kql(kql)
 
 The function `run_kql` will return a Pandas Dataframe object hold by `r`. The `kr` object will be reused in the following samples.
 
+Use `run_kql_all` to output multiple result set. 
+
+```python
+kql = '''
+StormEvents 
+| take 10
+;
+StormEvents 
+| summarize count()
+'''
+rs = kr.run_kql_all(kql=kql)
+for r in rs:
+    display(r)
+```
+
 ### Show Kusto tables
 
 List all tables:
