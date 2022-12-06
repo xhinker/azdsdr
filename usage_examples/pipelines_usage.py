@@ -8,7 +8,7 @@ pipline = Pipelines(
 )
 
 kql = """
-StormEvents | take 1000
+StormEvents | take 100000
 """
 
 pipline.kusto_to_csv(

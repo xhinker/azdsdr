@@ -1,6 +1,16 @@
 #sample codes for data readers
 
-#%% 
+#%% Kusto Reader
+from azdsdr.readers import KustoReader
+kr = KustoReader()
+
+kql = '''
+StormEvents 
+| summarize count()
+'''
+kr.run_kql(kql)
+
+#%% Dremio Reader
 from azdsdr.readers import DremioReader
 username    = "name@host.com"
 token       = "token string"
