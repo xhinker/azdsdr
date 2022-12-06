@@ -199,7 +199,7 @@ kr.upload_csv_from_blob (
 )
 ```
 
-I will cover how to generate `blob_sas_url` in the Azure Blob Reader section. 
+I will cover how to generate `blob_sas_url` in the Azure Blob Reader section. [TODO]
 
 ## Use Dremimo Reader
 
