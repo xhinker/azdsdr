@@ -53,6 +53,7 @@ Besides, the package also include functions from `Pipelines` class to help move 
 
 * Add function `download_file_list` of class `AzureBlobReader` to download a list of CSV file with the same schema and merge to one target CSV file.
 * Add function `delete_blob_files` of class `AzureBlobReader` to delete a list of blob files.
+* Add [usage sample code](https://github.com/xhinker/azdsdr/tree/main/usage_examples). 
 
 ## Installation
 
