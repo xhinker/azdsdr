@@ -16,7 +16,6 @@ username    = "name@host.com"
 token       = "token string"
 dr          = DremioReader(username=username,token=token)
 
-#%%
 sql = '''
 select 
     * 
