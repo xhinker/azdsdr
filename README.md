@@ -3,8 +3,6 @@
 [![PyPI version](https://badge.fury.io/py/azdsdr.svg)](https://badge.fury.io/py/azdsdr)
 
 - [Andrew's all-in-one data reader - AZDSDR](#andrews-all-in-one-data-reader---azdsdr)
-  - [Update Logs](#update-logs)
-    - [Dec 6, 2022](#dec-6-2022)
   - [Installation](#installation)
   - [Use Kusto Reader](#use-kusto-reader)
     - [Azure CLI Authentication](#azure-cli-authentication)
@@ -23,6 +21,8 @@
   - [Data Tools](#data-tools)
     - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
+  - [Update Logs](#update-logs)
+    - [Dec 6, 2022](#dec-6-2022)
 
 This package includes data reader for DS to access data in a easy way. 
 
@@ -46,14 +46,6 @@ Besides, the package also include functions from `Pipelines` class to help move 
 
 * Dremio to Kusto
 * Kusto to CSV file
-
-## Update Logs
-
-### Dec 6, 2022
-
-* Add function `download_file_list` of class `AzureBlobReader` to download a list of CSV file with the same schema and merge to one target CSV file.
-* Add function `delete_blob_files` of class `AzureBlobReader` to delete a list of blob files.
-* Add [usage sample code](https://github.com/xhinker/azdsdr/tree/main/usage_examples). 
 
 ## Installation
 
@@ -283,3 +275,13 @@ display_all(pd_data,top=20)
 ## Thanks
 
 The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/kcm117). Glory and credits belong to KC. 
+
+--- 
+
+## Update Logs
+
+### Dec 6, 2022
+
+* Add function `download_file_list` of class `AzureBlobReader` to download a list of CSV file with the same schema and merge to one target CSV file.
+* Add function `delete_blob_files` of class `AzureBlobReader` to delete a list of blob files.
+* Add [usage sample code](https://github.com/xhinker/azdsdr/tree/main/usage_examples). 
