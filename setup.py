@@ -19,6 +19,7 @@ setup(
         ,'azure-kusto-ingest'
         ,'azure-storage-blob'
         ,'matplotlib'
+        ,'jupyterlab'
         ,'ipython'
         ,'ipykernel'
     ],

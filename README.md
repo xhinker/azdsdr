@@ -15,6 +15,9 @@
     - [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
     - [Step 3. Configure driver](#step-3-configure-driver)
     - [Dremio Sample Query](#dremio-sample-query)
+  - [Move data with functions from `Pipelines` class](#move-data-with-functions-from-pipelines-class)
+    - [Export Kusto data to local csv file](#export-kusto-data-to-local-csv-file)
+    - [Move Dremio data to Kusto](#move-dremio-data-to-kusto)
   - [Data Tools](#data-tools)
     - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
@@ -36,6 +39,11 @@ May cover in the future:
 * Postgresql
 * Microsoft SQL Server
 * SQLite
+
+Besides, the package also include functions from `Pipelines` class to help move data around: 
+
+* Dremio to Kusto
+* Kusto to CSV file
 
 ## Installation
 
@@ -230,6 +238,18 @@ limit 10
 '''
 r = dr.run_sql(sql)
 ```
+
+## Move data with functions from `Pipelines` class
+
+### Export Kusto data to local csv file
+
+[TODO]
+
+When the export data is very large like exceed 1 billion rows, kusto will export data to several csv files. this function will automatically combine the data to one single CSV file in destination folder.
+
+### Move Dremio data to Kusto 
+
+[TODO]
 
 ## Data Tools
 

@@ -2,6 +2,8 @@
 from pathlib import Path
 import uuid
 import json
+import os
+# endregion
 
 # region prepare config
 config_file_path = Path.home() / '.azdsdr_conf.json'
@@ -19,7 +21,7 @@ def update_config(key,value):
     config_obj_json = json.dumps(config_obj)
     with open(config_file_path,'w') as f:
         f.write(config_obj_json)
-# end region
+# endregion
 
 # region Dremio
 import pandas as pd
@@ -471,6 +473,10 @@ from datetime import datetime,timedelta
 
 class AzureBlobReader:
     '''
+    Args:
+        * container_name is required 
+        * The class will retrieve blob_conn_str from configuration file is the parameter is set as None
+
     Functions from this class support the following Features: 
     * Download file
     * Upload file
@@ -478,7 +484,7 @@ class AzureBlobReader:
     * Get Blob SAS Url
     * Delete file
     '''
-    def __init__(self,container_name,blob_conn_str=None) -> None:
+    def __init__(self,container_name,blob_conn_str=None):
         if blob_conn_str:
             self.connect_string         = blob_conn_str
             # update the azure blob connection string with the newest one
@@ -500,7 +506,39 @@ class AzureBlobReader:
         with open(local_file_path,'wb') as f:
             download_stream = blob_client.download_blob()
             f.write(download_stream.readall())
-        return "download done"
+        return f"blob file {blob_file_path} is downloaded to {local_file_path}"
+
+    def download_file_list(self,blob_file_path_list,local_file_path) -> str:
+        '''
+        Download a list of file with the same schema
+        '''
+        # write the complete csv file with header
+        blob_client = self.container_client.get_blob_client(blob_file_path_list[0])
+        with open(local_file_path,'wb') as f:
+            download_stream = blob_client.download_blob()
+            f.write(download_stream.readall())
+
+        # write the following files without header
+        try:
+            for blob_file_path in blob_file_path_list[1:]:
+                blob_client = self.container_client.get_blob_client(blob_file_path)
+                # write to a temp file 
+                with open("temp.csv",'ab') as f:
+                    download_stream = blob_client.download_blob()
+                    f.write(download_stream.readall())
+                # remove teh first line and then write back to the target file 
+                with open(local_file_path,'a') as f_target:
+                    with open('temp.csv','r+') as f:
+                        lines = f.readlines()
+                        f.seek(0)
+                        f.truncate()
+                        f_target.writelines(lines[1:])
+        except:
+            raise Exception('write csv file error')
+        finally:
+            os.remove('temp.csv')
+
+        return f"All blob files are downloaded to {local_file_path}"
 
     def upload_file(self,blob_file_path,local_file_path):
         '''
@@ -570,6 +608,13 @@ class AzureBlobReader:
         try:
             blob_client = self.container_client.get_blob_client(blob_file_path)
             blob_client.delete_blob()
+        except:
+            print('Delete file error')
+    
+    def delete_blob_files(self,blob_file_path_list):
+        try:
+            for f_path in blob_file_path_list:
+                self.delete_blob_file(f_path)
         except:
             print('Delete file error')
 
@@ -800,7 +845,7 @@ class Pipelines:
         try:
             azure_blob_key = config_obj['azure_blob_key']
             azure_blob_account = config_obj['azure_blob_connstr'].split(';')[1].replace('AccountName=','')
-            print('azure_blob_account',azure_blob_account)
+            print(f"azure_blob_account {azure_blob_account} will be used as the exporting middle layer")
         except:
             print('get azure blob key and connection string error')
 
@@ -808,9 +853,9 @@ class Pipelines:
         temp_name = str(uuid.uuid4())
         
         kusto_head = f'''.export async to csv(
-            h@"https://{azure_blob_account}.blob.core.windows.net:443//{self.azure_blob_container};{azure_blob_key}"
+            h@"https://{azure_blob_account}.blob.core.windows.net:443//{self.azure_blob_container}/azdsdr;{azure_blob_key}"
         ) with (
-            sizeLimit        = 1000000000
+            sizeLimit        = 100000000
             ,namePrefix      = {temp_name}
             ,includeHeaders  = all
             ,encoding        = UTF8NoBOM
@@ -838,13 +883,22 @@ class Pipelines:
                     break
             
             print('Kusto export to Azure Blob done.')
+        except:
+            raise Exception('Kusto export error')
 
-            # download blob file
-            blob_file_path = f"{temp_name}_1.csv"
-            self.abr.download_file(blob_file_path=blob_file_path,local_file_path=output_csv_file_name)
+        try:
+            # query the export files start with temp uuid. 
+            file_list = self.abr.container_client.list_blobs(name_starts_with = f"azdsdr/{temp_name}")
+            file_name_list = [f['name'] for f in file_list]
+            self.abr.download_file_list(
+                blob_file_path_list = file_name_list
+                ,local_file_path    = output_csv_file_name
+            )
+        except:
+            raise Exception('blob csv files download error')
         finally:
             # delete blob temp file
-            self.abr.delete_blob_file(blob_file_path=blob_file_path)
+            self.abr.delete_blob_files(blob_file_path_list=file_name_list)
 
         print('Kusto to CSV done!')
 # endregion
