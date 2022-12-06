@@ -1,4 +1,4 @@
-#sample codes for data readers
+#Sample codes for data readers
 
 #%% Kusto Reader
 from azdsdr.readers import KustoReader
