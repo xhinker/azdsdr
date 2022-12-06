@@ -517,6 +517,9 @@ class AzureBlobReader:
         with open(local_file_path,'wb') as f:
             download_stream = blob_client.download_blob()
             f.write(download_stream.readall())
+        
+        if len(blob_file_path_list) == 1:
+            return f"Single blob file is downloaded to {local_file_path}"
 
         # write the following files without header
         try:
@@ -824,14 +827,14 @@ class Pipelines:
         ,output_csv_file_name
     ):
         '''
-        The function will 
+        The function will:
         1. execute plain KQL(without .export async to csv). 
         2. output data to Azure blob storage as csv file.
-        3. download data from azure blob storage to local file path
+        3. download data from azure blob storage to local file path.
 
         Args:
-            input_kql (str): the kusto script that generate the dataset
-            output_csv_path (str): the local csv file path (absolute or relative path)
+            input_kql (str): the kusto script that generate the dataset.
+            output_csv_path (str): the local csv file path (absolute or relative path).
         
         Returns: 
             str: the execution status of the function. 
