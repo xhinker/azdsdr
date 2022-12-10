@@ -138,3 +138,5 @@ publish.sh
 publish.ps1
 
 test/
+
+usage_examples/*.csv
