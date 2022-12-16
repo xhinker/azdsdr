@@ -329,7 +329,6 @@ class KustoReader:
         | getschema
         | order by ColumnOrdinal asc
         '''
-        print(kql)
         r = self.kr.run_kql(kql)[["ColumnName","ColumnType"]]
         col_name_type_pair_list = []
         for _,row in r.iterrows():

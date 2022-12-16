@@ -22,6 +22,7 @@
     - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
   - [Update Logs](#update-logs)
+    - [Dec 16, 2022](#dec-16-2022)
     - [Dec 10, 2022](#dec-10-2022)
     - [Dec 6, 2022](#dec-6-2022)
 
@@ -300,6 +301,11 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Dec 16, 2022
+
+* Add function `get_table_schema` for `KustoReader`
+* Add function `get_table_folder` for `KustoReader`
 
 ### Dec 10, 2022
 
