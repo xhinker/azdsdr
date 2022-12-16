@@ -13,3 +13,12 @@ limit 10
 '''
 r = dr.run_sql(sql)
 display(r)
+
+#%%
+from azdsdr.readers import DremioReader
+username    = "anzhu@microsoft.com"
+dr = DremioReader(username=username)
+
+query_sql   = """SELECT * FROM Azure.PPE."vw_customer_azure_monthlyusage " LIMIT 10"""
+r           = dr.run_sql(query_sql)
+display(r)

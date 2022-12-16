@@ -22,6 +22,7 @@
     - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
   - [Update Logs](#update-logs)
+    - [Dec 10, 2022](#dec-10-2022)
     - [Dec 6, 2022](#dec-6-2022)
 
 This package includes data reader for DS to access data in a easy way. 
@@ -227,9 +228,12 @@ Note: you will have to log out your Windows account and log in again to take the
 - Go to Start Menu -> “ODBC Data Sources (64-bit)”.
 - Under User DSN, click “Add”.
 - Add Dremio Connector.
-- Configure as follows, with your own <alias>@host.com as the username.Do remember to replace the dremio host with your own host string. 
+- Configure as follows:
+  - set `Data Source Name` as **Dremio Connector**. 
+  - with your own **user@example.com** as the username.
+  - Do remember to replace the dremio host with your own host string. 
 
-![](https://github.com/xhinker/azdsdr/blob/main/README/2022-09-29-13-26-26.png)
+![](README/2022-12-10-13-27-32.png)
 
 - Click Ok/Save
 
@@ -296,6 +300,10 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Dec 10, 2022
+
+* Update Dremio Reader configuration document and screenshot.
 
 ### Dec 6, 2022
 
