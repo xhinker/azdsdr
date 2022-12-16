@@ -317,6 +317,34 @@ class KustoReader:
             '''
         r = self.run_kql(kql)
         return r
+    
+    def get_table_schema(self,table_name):
+        '''
+        Return the table schema in format as 
+            "ColumnName1:type2,ColumnName2:type2"
+        The schema string can be useful to update table meta, for example, add docstring to the table. 
+        '''
+        kql = f'''
+        {table_name} 
+        | getschema
+        | order by ColumnOrdinal asc
+        '''
+        print(kql)
+        r = self.kr.run_kql(kql)[["ColumnName","ColumnType"]]
+        col_name_type_pair_list = []
+        for _,row in r.iterrows():
+            pair_string = f"{row['ColumnName']}:{row['ColumnType']}"
+            col_name_type_pair_list.append(pair_string)
+        return ",".join(col_name_type_pair_list)
+    
+    def get_table_folder(self,table_name):
+        '''
+        Get target table's folder path string
+        '''
+        kql = f'''
+        .show table {table_name} details
+        '''
+        return self.kr.run_kql(kql)['Folder'][0]
 
 # endregion
 

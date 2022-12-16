@@ -49,6 +49,8 @@ Besides, the package also include functions from `Pipelines` class to help move 
 
 ## Installation
 
+The module is test and usable for Python 3.10 and Python 3.9. Other versions(Python 3.6+) should also works. 
+
 Use pip to install the package and all of the dependences
 
 ```
