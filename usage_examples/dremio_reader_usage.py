@@ -15,6 +15,8 @@ r = dr.run_sql(sql)
 display(r)
 
 #%%
+import sys
+sys.path.append(r"D:\az_git_folder\azdsdr\src")
 from azdsdr.readers import DremioReader
 username    = "anzhu@microsoft.com"
 dr = DremioReader(username=username)
