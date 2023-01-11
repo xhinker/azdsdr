@@ -22,6 +22,7 @@
     - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
   - [Update Logs](#update-logs)
+    - [Jan 10, 2023](#jan-10-2023)
     - [Dec 16, 2022](#dec-16-2022)
     - [Dec 10, 2022](#dec-10-2022)
     - [Dec 6, 2022](#dec-6-2022)
@@ -301,6 +302,10 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Jan 10, 2023
+
+* Add guid to the temp cosmos script file and temp middle stream file to avoid temp files collision. 
 
 ### Dec 16, 2022
 

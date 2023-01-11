@@ -445,7 +445,7 @@ class CosmosReader:
     def scope_query(
         self
         ,scope_script:str
-        ,temp_data_path = "/users/anzhu/query_temp.ss"
+        ,temp_data_path = "/users/anzhu/query_temp"
         ,temp_query_data = 'temp_query_data.csv'
     ) -> pd.DataFrame:
         '''
@@ -457,14 +457,16 @@ class CosmosReader:
         Step 3. use check_job_status to check the job status until the job done
         Step 4. use download_file_as_csv function to download the output data as csv
         Step 5. load the csv file into pandas DataFrame
-        Step 6. Delete the temp query data from cosmos
+        Step 6. Delete the temp query and data from cosmos and 
 
         Args
             scope_script (str): 
         '''
-        temp_script_path = 'temp.script'
+        guid             = str(uuid.uuid4())
+        temp_script_path = f'execution_temp_{guid}.script'
         # Step 0. 
-        output_declare = f'''#DECLARE output string = "{temp_data_path}";'''
+        vc_temp_file_path = f"{temp_data_path}_{guid}.ss"
+        output_declare = f'''#DECLARE output string = "{vc_temp_file_path}";'''
         scope_script = output_declare + scope_script
         print(scope_script)
 
@@ -476,13 +478,18 @@ class CosmosReader:
         output_str = self.run_scope(temp_script_path)
 
         # Step 3. 
-        self.check_job_status(output_str)
+        self.check_job_status(output_str,check_times=720)
 
         # Step 4. 
-        self.download_file_as_csv(temp_data_path,temp_query_data)
+        self.download_file_as_csv(vc_temp_file_path,temp_query_data)
 
         # Step 5. 
         df = pd.read_csv(temp_query_data)
+
+        # Step 6.
+        os.remove(temp_script_path)
+        os.remove(temp_query_data)
+        self.delete_file_from_cosmos(vc_temp_file_path)
 
         return df
 
@@ -781,10 +788,10 @@ class Pipelines:
             # clean up files
             # # clean up local csv 
             import os
-            os.remove('temp.script')
+            #os.remove('temp.script')
             os.remove(local_csv_file_path)
             # # clean up cosmos csv
-            cr.delete_file_from_cosmos(vc_temp_file_path)
+            #cr.delete_file_from_cosmos(vc_temp_file_path)
             # # delete file from blob
             abr.delete_blob_file(blob_file_path)
             
