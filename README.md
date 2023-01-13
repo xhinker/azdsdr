@@ -32,9 +32,9 @@ This package includes data reader for DS to access data in a easy way.
 Covered data platforms:
 
 * Kusto
-* Azure Blob Storage
+* Azure Blob Storage (Samples coming soon)
 * Dremio
-* Microsoft Cosmos (Not Azure Cosmos DB, the Microsoft Cosmos using Scope, now AKA Azure Data Lake)
+* Microsoft Cosmos - Not Azure Cosmos DB, the Microsoft Cosmos using Scope, now AKA Azure Data Lake (Samples coming soon) 
 
 May cover in the future:
 
