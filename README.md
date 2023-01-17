@@ -22,6 +22,7 @@
     - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
   - [Thanks](#thanks)
   - [Update Logs](#update-logs)
+    - [Jan 17, 2023](#jan-17-2023)
     - [Jan 10, 2023](#jan-10-2023)
     - [Dec 16, 2022](#dec-16-2022)
     - [Dec 10, 2022](#dec-10-2022)
@@ -302,6 +303,11 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Jan 17, 2023
+
+* Add `show_data_label` option for `vis_tools`'s `line1_chart` function. 
+If specify the `show_data_label=True`, the chart will show each data point's value. 
 
 ### Jan 10, 2023
 

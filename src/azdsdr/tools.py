@@ -163,6 +163,7 @@ class vis_tools:
         ,x_list
         ,y_list
         ,line1_name = ''
+        ,show_data_label = False
     ):
         fig,ax          = plt.subplots() 
         fig.set_size_inches(self.size_w, self.size_h)
@@ -186,6 +187,12 @@ class vis_tools:
         ax.text(max(x_label_index),y_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
         #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
         ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
+
+        # show data label or not
+        if show_data_label:
+            for index in range(len(x_list)):
+                ax.text(index,y_list[index],self.human_format(y_list[index]),size=12)
+
         return ax
 
     def line2_chart(
