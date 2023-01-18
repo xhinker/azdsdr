@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='azdsdr',
-    version='1.230118.1',
+    version='1.230118.2',
     license='Apache License',
     author="Andrew Zhu",
     author_email='xhinker@hotmail.com',
@@ -23,4 +23,5 @@ setup(
         ,'ipython'
         ,'ipykernel'
     ],
+    description="This package provide functions and tools for accessing data in a easy way."
 )
