@@ -235,7 +235,8 @@ class vis_tools:
 
         if show_data_label:
             for index in range(len(x_list)):
-                ax.text(index,y_list[index],self.human_format(y_list[index]),size=12)
+                ax.text(index,y1_list[index],self.human_format(y1_list[index]),size=12)
+                ax.text(index,y2_list[index],self.human_format(y2_list[index]),size=12)
         
         if show_grid:
             ax.grid(True)
