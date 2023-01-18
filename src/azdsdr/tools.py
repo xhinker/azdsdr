@@ -164,6 +164,7 @@ class vis_tools:
         ,y_list
         ,line1_name = ''
         ,show_data_label = False
+        ,show_grid = False
     ):
         fig,ax          = plt.subplots() 
         fig.set_size_inches(self.size_w, self.size_h)
@@ -192,6 +193,9 @@ class vis_tools:
         if show_data_label:
             for index in range(len(x_list)):
                 ax.text(index,y_list[index],self.human_format(y_list[index]),size=12)
+        
+        if show_grid:
+            ax.grid(True)
 
         return ax
 
@@ -203,6 +207,8 @@ class vis_tools:
         ,y2_list
         ,line1_name = ''
         ,line2_name = ''
+        ,show_data_label = False
+        ,show_grid = False
     ):
         fig,ax          = plt.subplots() 
         fig.set_size_inches(self.size_w, self.size_h)
@@ -226,6 +232,14 @@ class vis_tools:
         ax.text(max(x_label_index),y2_list[-1],line2_name,**self.label_text_font,color=self.light_blue)
         #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
         ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
+
+        if show_data_label:
+            for index in range(len(x_list)):
+                ax.text(index,y_list[index],self.human_format(y_list[index]),size=12)
+        
+        if show_grid:
+            ax.grid(True)
+
         return ax
 
 # endregion

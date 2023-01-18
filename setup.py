@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='azdsdr',
-    version='1.230117.1',
+    version='1.230118.1',
     license='Apache License',
     author="Andrew Zhu",
     author_email='xhinker@hotmail.com',
