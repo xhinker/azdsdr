@@ -85,7 +85,7 @@ If you are working on a new build OS, the all-in-one installation will also save
 
 Most of the time, all dependent packages should be successfully installed without any additional interfere. But you may still see error message based on different OS and Python version. 
 
-1. Need evaluated permission
+1. Need elevated permission
 
 	* Error message:
 		```
