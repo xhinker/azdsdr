@@ -1,8 +1,8 @@
-# Andrew's all-in-one data reader - AZDSDR
+# An all-in-one data reader and tools in Python - AZDSDR
 
 [![PyPI version](https://badge.fury.io/py/azdsdr.svg)](https://badge.fury.io/py/azdsdr)
 
-- [Andrew's all-in-one data reader - AZDSDR](#andrews-all-in-one-data-reader---azdsdr)
+- [An all-in-one data reader and tools in Python - AZDSDR](#an-all-in-one-data-reader-and-tools-in-python---azdsdr)
 	- [Installation](#installation)
 		- [Potential installation errors and solutions](#potential-installation-errors-and-solutions)
 	- [Use Kusto Reader](#use-kusto-reader)
