@@ -3,30 +3,32 @@
 [![PyPI version](https://badge.fury.io/py/azdsdr.svg)](https://badge.fury.io/py/azdsdr)
 
 - [Andrew's all-in-one data reader - AZDSDR](#andrews-all-in-one-data-reader---azdsdr)
-  - [Installation](#installation)
-  - [Use Kusto Reader](#use-kusto-reader)
-    - [Azure CLI Authentication](#azure-cli-authentication)
-    - [Run any Kusto query](#run-any-kusto-query)
-    - [Show Kusto tables](#show-kusto-tables)
-    - [Create an empty Kusto table from a CSV file](#create-an-empty-kusto-table-from-a-csv-file)
-    - [Upload data to Kusto](#upload-data-to-kusto)
-  - [Use Dremimo Reader](#use-dremimo-reader)
-    - [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
-    - [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
-    - [Step 3. Configure driver](#step-3-configure-driver)
-    - [Dremio Sample Query](#dremio-sample-query)
-  - [Move data with functions from `Pipelines` class](#move-data-with-functions-from-pipelines-class)
-    - [Export Kusto data to local csv file](#export-kusto-data-to-local-csv-file)
-    - [Move Dremio data to Kusto](#move-dremio-data-to-kusto)
-  - [Data Tools](#data-tools)
-    - [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
-  - [Thanks](#thanks)
-  - [Update Logs](#update-logs)
-    - [Jan 17, 2023](#jan-17-2023)
-    - [Jan 10, 2023](#jan-10-2023)
-    - [Dec 16, 2022](#dec-16-2022)
-    - [Dec 10, 2022](#dec-10-2022)
-    - [Dec 6, 2022](#dec-6-2022)
+	- [Installation](#installation)
+		- [Potential installation errors and solutions](#potential-installation-errors-and-solutions)
+	- [Use Kusto Reader](#use-kusto-reader)
+		- [Azure CLI Authentication](#azure-cli-authentication)
+		- [Run any Kusto query](#run-any-kusto-query)
+		- [Show Kusto tables](#show-kusto-tables)
+		- [Create an empty Kusto table from a CSV file](#create-an-empty-kusto-table-from-a-csv-file)
+		- [Upload data to Kusto](#upload-data-to-kusto)
+	- [Use Dremimo Reader](#use-dremimo-reader)
+		- [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
+		- [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
+		- [Step 3. Configure driver](#step-3-configure-driver)
+		- [Dremio Sample Query](#dremio-sample-query)
+	- [Move data with functions from `Pipelines` class](#move-data-with-functions-from-pipelines-class)
+		- [Export Kusto data to local csv file](#export-kusto-data-to-local-csv-file)
+		- [Move Dremio data to Kusto](#move-dremio-data-to-kusto)
+	- [Data Tools](#data-tools)
+		- [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
+	- [Thanks](#thanks)
+	- [Update Logs](#update-logs)
+		- [Jan 18, 2023](#jan-18-2023)
+		- [Jan 17, 2023](#jan-17-2023)
+		- [Jan 10, 2023](#jan-10-2023)
+		- [Dec 16, 2022](#dec-16-2022)
+		- [Dec 10, 2022](#dec-10-2022)
+		- [Dec 6, 2022](#dec-6-2022)
 
 This package includes data reader for DS to access data in a easy way. 
 
@@ -78,6 +80,46 @@ The installation will also install all the dependance packages automatrically.
 * ipykernel
 
 If you are working on a new build OS, the all-in-one installation will also save you time from installing individual packages one by one. 
+
+### Potential installation errors and solutions
+
+Most of the time, all dependent packages should be successfully installed without any additional interfere. But you may still see error message based on different OS and Python version. 
+
+1. Need evaluated permission
+
+	* Error message:
+		```
+		Error: Could not install packages due to an OSError: [Erron 13] Permission denied:...
+		```
+	* Solution:  
+  		Start a new Windows terminal window with Administrator permission (Right click icon, and then "Run as administrator")
+
+1. Fail to install `pyodbc`  
+
+	Usually occurs in Linux and MacOS. 
+
+	* Error message  
+  
+		```
+		Building wheel for pyodbc (setup.py) ... error
+		```
+
+	* Solution  
+
+		Linux: run this first 
+
+		```bash
+		sudo apt-get install unixodbc-dev
+		```
+		<https://github.com/mkleehammer/pyodbc/issues/276>
+
+		Macos: run this first
+		```bash
+		brew install unixodbc
+		export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/2.3.9/lib"
+		export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/2.3.9/include"
+		```
+
 
 ## Use Kusto Reader
 
@@ -303,6 +345,10 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Jan 18, 2023
+
+* Add walk-around and solutions to potential installation errors. 
 
 ### Jan 17, 2023
 
