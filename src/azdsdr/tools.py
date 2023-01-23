@@ -165,6 +165,8 @@ class vis_tools:
         ,line1_name = ''
         ,show_data_label = False
         ,show_grid = False
+        ,xlabel_name = None
+        ,ylabel_name = None
     ):
         fig,ax          = plt.subplots() 
         fig.set_size_inches(self.size_w, self.size_h)
@@ -189,13 +191,22 @@ class vis_tools:
         #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
         ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
 
-        # show data label or not
+        # decide if show data label
         if show_data_label:
             for index in range(len(x_list)):
                 ax.text(index,y_list[index],self.human_format(y_list[index]),size=12)
         
+        # decide if show grid
         if show_grid:
             ax.grid(True)
+
+        # decide if show x axis
+        if xlabel_name:
+            ax.set_xlabel(xlabel_name)
+
+        # decide if show y axis
+        if ylabel_name:
+            ax.set_ylabel(ylabel_name)
 
         return ax
 

@@ -23,6 +23,7 @@
 		- [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
 	- [Thanks](#thanks)
 	- [Update Logs](#update-logs)
+		- [Jan 23, 2023](#jan-23-2023)
 		- [Jan 18, 2023](#jan-18-2023)
 		- [Jan 17, 2023](#jan-17-2023)
 		- [Jan 10, 2023](#jan-10-2023)
@@ -345,6 +346,10 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Jan 23, 2023
+
+* Add `Grid` and `XY Axes Lable` option for 1 line and 2 lines chart.
 
 ### Jan 18, 2023
 
