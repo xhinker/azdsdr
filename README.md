@@ -23,6 +23,7 @@
 		- [`display_all` Display all dataframe rows](#display_all-display-all-dataframe-rows)
 	- [Thanks](#thanks)
 	- [Update Logs](#update-logs)
+		- [Jan 24, 2024](#jan-24-2024)
 		- [Jan 23, 2023](#jan-23-2023)
 		- [Jan 18, 2023](#jan-18-2023)
 		- [Jan 17, 2023](#jan-17-2023)
@@ -346,6 +347,10 @@ The Dremio ODBC Reader solution is origin from [KC Munnings](https://github.com/
 --- 
 
 ## Update Logs
+
+### Jan 24, 2024
+
+* Add `bar1_chart` in `vis_tools`, so that you can plot bar chart using `vis_tools` class.
 
 ### Jan 23, 2023
 

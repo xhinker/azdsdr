@@ -220,6 +220,8 @@ class vis_tools:
         ,line2_name = ''
         ,show_data_label = False
         ,show_grid = False
+        ,xlabel_name = None
+        ,ylabel_name = None
     ):
         fig,ax          = plt.subplots() 
         fig.set_size_inches(self.size_w, self.size_h)
@@ -239,8 +241,8 @@ class vis_tools:
         ax.set_xticklabels(x_list)
         ax.set_ylim(bottom=0)
 
-        ax.text(max(x_label_index),y1_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
-        ax.text(max(x_label_index),y2_list[-1],line2_name,**self.label_text_font,color=self.light_blue)
+        ax.text(max(x_label_index)+1,y1_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
+        ax.text(max(x_label_index)+1,y2_list[-1],line2_name,**self.label_text_font,color=self.light_blue)
         #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
         ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
 
@@ -252,6 +254,65 @@ class vis_tools:
         if show_grid:
             ax.grid(True)
 
+        # decide if show x axis
+        if xlabel_name:
+            ax.set_xlabel(xlabel_name)
+
+        # decide if show y axis
+        if ylabel_name:
+            ax.set_ylabel(ylabel_name)
+
         return ax
+    
+    def bar1_chart(
+        self
+        ,title
+        ,x_list
+        ,y_list
+        ,xlabel_name = None
+        ,ylabel_name = None
+    ):
+        fig,ax          = plt.subplots() 
+        fig.set_size_inches(self.size_w, self.size_h)
+        
+        ax.set_title(
+            title
+            ,fontsize=self.title_size
+        )
+        ax.grid(False) 
+        ax.set_facecolor('w') 
+        ax.xaxis.set_tick_params(labelsize=self.label_size)
+        ax.yaxis.set_tick_params(labelsize=self.label_size)
+
+        x_label_index   = range(len(x_list))
+
+        ax.bar(
+            x_list
+            ,y_list
+            ,color = self.dark_blue
+        )
+
+        #rotate x labels 
+        x_label_rotate = 0
+        if len(x_list)>5:
+            x_label_rotate = 30
+        ax.set_xticklabels(x_list,rotation=x_label_rotate)
+
+        #set label value
+        y_max = max(y_list)
+        for i,v in enumerate(y_list):
+            ax.text(i,v+y_max/100, 
+                    f"{v:,d}",
+                    color = '#080808',
+                    fontweight = 'normal',
+                    ha = 'center')
+
+        # decide if show x axis
+        if xlabel_name:
+            ax.set_xlabel(xlabel_name)
+
+        # decide if show y axis
+        if ylabel_name:
+            ax.set_ylabel(ylabel_name)
 
 # endregion
