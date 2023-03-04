@@ -688,9 +688,9 @@ class Pipelines:
         '''
         con_str = config_obj['azure_blob_connstr']
 
+        # AzureBlobReader automatically load the connection, if no conn string is passed in.
         self.abr = AzureBlobReader(
-            blob_conn_str   = con_str
-            ,container_name = self.azure_blob_container
+            container_name = self.azure_blob_container
         )
         print('Azure blob Reader is ready')
     
@@ -698,11 +698,9 @@ class Pipelines:
         '''
         The function will load Dremio token from configure file .dremio_token.
         '''
-        token = config_obj['dremio_token']
-        
+        # The DremioReader object will look for token automatically. 
         self.dr  = DremioReader(
             username    = self.dremio_user_name
-            ,token      = token
             ,host       = self.dremio_host
         )
         print('Dremio Reader object is ready')
@@ -848,6 +846,9 @@ class Pipelines:
                 ,check_times        = 30
                 ,check_gap_min      = 2      
             )
+        except Exception as e:
+            print('load context error')
+            print(e)
         finally:
             # 8. Finally, remove local csv file, remove azure blob file. 
             os.remove(csv_file_name)
