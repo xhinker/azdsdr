@@ -216,7 +216,23 @@ db              = "Samples"
 kr              = KustoReader(cluster=cluster,db=db,ingest_cluster_str=ingest_cluster)
 ```
 
-Upload Pandas Dataframe to Kusto:
+Note that you will need to create a empty table with aligned table schema to hold the data. 
+
+You can also save the dataframe object `r` as CSV file first, and create a empty table from the csv file. 
+
+```python
+you_df_data.to_csv('temp.csv',index=False)
+
+target_kusto_table  =  'upload_df_to_kusto_test'
+kr.create_table_from_csv(
+    kusto_table_name = target_kusto_table
+    ,kusto_folder = 'test'
+    ,csv_file_path = 'temp.csv'
+)
+print('create empty table done')
+```
+
+Then upload Pandas Dataframe to Kusto:
 
 ```python
 target_kusto_table  = 'kusto_table_name'
@@ -225,6 +241,7 @@ kr.upload_df_to_kusto(
     target_table_name = target_kusto_table
     ,df_data          = df_data
 )
+kr.check_table_data(target_table_name=target_kusto_table)
 ```
 
 Upload CSV file to Kusto:
