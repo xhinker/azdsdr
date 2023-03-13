@@ -218,10 +218,10 @@ kr              = KustoReader(cluster=cluster,db=db,ingest_cluster_str=ingest_cl
 
 Note that you will need to create a empty table with aligned table schema to hold the data. 
 
-You can also save the dataframe object `you_df_data` as CSV file first, and create a empty table from the csv file. 
+You can also save the dataframe object `your_df_data` as CSV file first, and create a empty table from the csv file. 
 
 ```python
-you_df_data.to_csv('temp.csv',index=False)
+your_df_data.to_csv('temp.csv',index=False)
 
 target_kusto_table  =  'upload_df_to_kusto_test'
 kr.create_table_from_csv(
@@ -236,7 +236,7 @@ Then upload Pandas Dataframe to Kusto:
 
 ```python
 target_kusto_table  = 'kusto_table_name'
-df_data             = you_df_data
+df_data             = your_df_data
 kr.upload_df_to_kusto(
     target_table_name = target_kusto_table
     ,df_data          = df_data
