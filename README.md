@@ -11,7 +11,7 @@
 		- [Show Kusto tables](#show-kusto-tables)
 		- [Create an empty Kusto table from a CSV file](#create-an-empty-kusto-table-from-a-csv-file)
 		- [Upload data to Kusto](#upload-data-to-kusto)
-	- [Use Dremimo Reader](#use-dremimo-reader)
+	- [Use Dremio Reader](#use-dremio-reader)
 		- [Step 1. Install Dremio Connector](#step-1-install-dremio-connector)
 		- [Step 2. Generate a Personal Access Token(PAT)](#step-2-generate-a-personal-access-tokenpat)
 		- [Step 3. Configure driver](#step-3-configure-driver)
@@ -268,7 +268,7 @@ kr.upload_csv_from_blob (
 
 I will cover how to generate `blob_sas_url` in the Azure Blob Reader section. [TODO]
 
-## Use Dremimo Reader
+## Use Dremio Reader
 
 ### Step 1. Install Dremio Connector
 
