@@ -72,7 +72,7 @@ class vis_tools:
             magnitude += 1 
             num /= 1000.0 
         # add more suffixes if you need them 
-        return '%.0f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+        return '%.0f%s' % (num, ['', 'K', 'M', 'B', 'T', 'P'][magnitude])
 
     def single_bar_chart(
         self
