@@ -190,7 +190,7 @@ class vis_tools:
         ax.set_xticklabels(x_list)
         ax.set_ylim(bottom=0)
 
-        ax.text(max(x_label_index),y_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
+        ax.text(max(x_label_index)+1,y_list[-1],line1_name,**self.label_text_font,color=self.dark_blue)
         #ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
         ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p:self.human_format(x)))
 
