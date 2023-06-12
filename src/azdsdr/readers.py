@@ -891,12 +891,12 @@ class Pipelines:
         temp_name = str(uuid.uuid4())
         
         kusto_head = f'''.export async to csv(
-            h@"https://{azure_blob_account}.blob.core.windows.net:443//{self.azure_blob_container}/azdsdr;{azure_blob_key}"
+            h@"https://{azure_blob_account}.blob.core.windows.net:443/{self.azure_blob_container}/azdsdr;{azure_blob_key}"
         ) with (
             sizeLimit        = 100000000
-            ,namePrefix      = {temp_name}
-            ,includeHeaders  = all
-            ,encoding        = UTF8NoBOM
+            ,namePrefix      = "{temp_name}"
+            ,includeHeaders  = "all"
+            ,encoding        = "UTF8NoBOM"
             ,distributed     = false
         )
         <|
